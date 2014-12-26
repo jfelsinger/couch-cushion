@@ -1,0 +1,8 @@
+*.suo
+*.swp
+*.orig
+desktop.ini
+
+.DS_Store
+npm-debug.log
+node_modules
