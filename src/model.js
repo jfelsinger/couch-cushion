@@ -94,7 +94,7 @@ Model.prototype.save = function(cb, bucket) {
         this._fields.updated.set(new Date());
 
     for (var key in this._fields)
-        if (this._fields[key] instanceof Fields.object)
+        if (this._fields[key].save && typeof(this._fields[key].save) === 'function')
             this._fields[key].save();
 
     bucket.upsert(this._fields.id.get,this.getValue, cb);

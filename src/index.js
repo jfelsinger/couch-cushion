@@ -109,9 +109,13 @@ CouchCushion.prototype.getModel = function(model) {
 };
 
 
-CouchCushion.prototype.get = function(model, cb, id, bucket) {
+CouchCushion.prototype.get = function(id, cb, model, bucket) {
     bucket = bucket || this.options.bucket;
-    var Model = this.getModel(model);
+    var self = this,
+        Model;
+
+    if (model)
+        Model = this.getModel(model);
 
     bucket.get(id, function(err, res) {
         if (err) {
@@ -119,8 +123,16 @@ CouchCushion.prototype.get = function(model, cb, id, bucket) {
             return;
         }
 
-        var model = new Model();
-        model.set(res.value);
+        if (!Model && res.value && res.value.type) {
+            Model = self.getModel(res.value.type.capitalize(true));
+        }
+
+        if (Model) {
+            model = new Model();
+            model.set(res.value);
+        } else {
+            err = 'could not get model';
+        }
 
         cb(err, model, res);
     });

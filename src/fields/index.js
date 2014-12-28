@@ -38,6 +38,8 @@ var FIELDALIASES = {
   'Array':      'array',
 
   'Object':     'object',
+  'Model':      'object',
+  'model':      'object',
 };
 
 module.exports.fields = fields;

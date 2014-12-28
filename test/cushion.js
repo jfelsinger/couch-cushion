@@ -1,12 +1,22 @@
 'use strict';
 
 var Fields = require('../src/fields'),
+    Couchbase = require('couchbase'),
     Model = require('../src/model'),
-    cushion = require('../src');
+    cushion = require('../src'),
+    bucket = require('../lib/mocks/bucket');
 
 var should = require('should');
 
 describe('Couch Cushion', function() {
+    var schemaName = 'Test';
+    var testSchema = {
+        id: { field: 'Id', prefix: 'tst' },
+        type: { field: 'constant', value: 'test' },
+        text: String,
+        anotherString: 'string',
+        num: Number,
+    };
 
     it('should be', function(done) {
 
@@ -64,14 +74,6 @@ describe('Couch Cushion', function() {
     });
 
     describe('#model', function() {
-        var schemaName = 'Test';
-        var testSchema = {
-            id: { field: 'Id', prefix: 'tst' },
-            type: { field: 'constant', value: 'test' },
-            text: String,
-            anotherString: 'string',
-            num: Number,
-        };
 
         it('should throw when a model does not exist', function(done) {
 
@@ -104,8 +106,6 @@ describe('Couch Cushion', function() {
                 model.should.have.property(key);
             }
 
-            console.log(model.getValue());
-
             done();
         });
     });
@@ -132,16 +132,60 @@ describe('Couch Cushion', function() {
 
     });
 
-    describe('#save', function() {
-    });
+    // TODO: mock up a *better* couchbase db for all of this...
+    cushion.options.bucket = bucket;
 
     describe('#connect', function() {
     });
 
+    describe('#save', function() {
+
+        it('should save', function(done) {
+
+            var Model = cushion.model('Test');
+            var model = new Model();
+
+            cushion.save(model, function(err, res) {
+                done();
+            });
+        });
+
+    });
+
     describe('#get', function() {
+
+        it('should run a callback with a constructed model', function(done) {
+            var cb = function(err, model, res) {
+                var Model = cushion.model('Test');
+
+                (model === undefined).should.false;
+                model.should.be.an.instanceof(Model);
+
+                done();
+            };
+
+            cushion.get('Test', cb);
+        });
+
     });
 
     describe('#getOne', function() {
+
+        it('should run a callback with a constructed model', function(done) {
+            var cb = function(err, model, res) {
+                var Model = cushion.model('Test');
+
+                (model === undefined).should.false;
+                model.should.be.an.instanceof(Model);
+
+                done();
+            };
+
+            var search = Couchbase.ViewQuery.from('doc', 'view');
+
+            cushion.getOne('Test', cb, search);
+        });
+
     });
 
     describe('#getMany', function() {
