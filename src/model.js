@@ -1,7 +1,8 @@
 'use strict';
 /* jslint latedef:false */
 
-var Fields = require('./fields');
+var Fields = require('./fields'),
+    Schema = require('./schema');
 
 function Model(options) {
     this.options = {};
@@ -40,26 +41,75 @@ Model.prototype.schema = {
  * @return mixed
  */
 function _initFields(model) {
-    var get = function(name) {
+    var schema = model.schema;
+
+    if (schema instanceof Schema || schema.schema) {
+        setSchema(schema.schema);
+
+        if (schema.computed)
+            setComputed(schema.computed);
+
+        if (schema.methods)
+            setMethods(schema.methods);
+    } else {
+        // Se assume that it is a basic object schema
+        setSchema(schema);
+    }
+
+    function get(name) {
         return function getter() {
             return this._fields[name].get();
         };
-    };
+    }
 
-    var set = function(name) {
+    function set(name) {
         return function setter(value) {
             this._fields[name].set(value);
         };
-    };
+    }
 
-    for (var name in model.schema) {
-        var field = Fields.buildScheme(model.schema[name], name);
-        model._fields[name] = field;
+    function setMethods(methods) {
+        for (var methodName in methods) {
+            var method = methods[methodName];
+            model._methods[methodName] = method;
 
-        Object.defineProperty(model, name, {
-            get: get(name),
-            set: set(name)
-        });
+            Object.defineProperty(model, methodName, {
+                value: method
+            });
+        }
+    }
+
+    function setComputed(computedProperties) {
+        for (var name in computedProperties) {
+            var computed = computedProperties[name];
+            model._computed[name] = computed;
+
+            if (computed.setter) {
+                Object.defineProperty(model, name, {
+                    get: computed.getter,
+                    set: computed.setter,
+                    enumerable: true
+                });
+            } else {
+                Object.defineProperty(model, name, {
+                    get: computed.getter,
+                    enumerable: true
+                });
+            }
+        }
+    }
+
+    function setSchema(schema) {
+        for (var name in schema) {
+            var field = Fields.buildScheme(schema[name], name);
+            model._fields[name] = field;
+
+            Object.defineProperty(model, name, {
+                get: get(name),
+                set: set(name),
+                enumerable: true
+            });
+        }
     }
 }
 
