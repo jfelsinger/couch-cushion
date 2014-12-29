@@ -1,7 +1,7 @@
 'use strict';
 
 var ObjectField = require('../../src/fields/object'),
-    cushion = require('../../src');
+    cushion = require('../..');
 
 describe('ObjectField', function() {
     var field;

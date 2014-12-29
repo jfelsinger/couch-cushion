@@ -4,7 +4,7 @@ var Fields = require('../src/fields'),
     Couchbase = require('couchbase'),
     Model = require('../src/model'),
     Schema = require('../src/schema'),
-    cushion = require('../src'),
+    cushion = require('..'),
     bucket = require('../lib/mocks/bucket');
 
 var should = require('should');

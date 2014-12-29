@@ -1,7 +1,7 @@
 'use strict';
 
 var Schema = require('../src/schema'),
-    cushion = require('../src');
+    cushion = require('..');
 
 var should = require('should');
 
