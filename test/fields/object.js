@@ -1,9 +1,24 @@
 'use strict';
 
 var ObjectField = require('../../src/fields/object'),
+    bucket = require('../../lib/mocks/bucket'),
     cushion = require('../..');
 
 describe('ObjectField', function() {
+    cushion.options.bucket = bucket;
+    if (!cushion._models.Test) {
+        var schemaName = 'Test';
+        var testSchema = {
+            id: { field: 'Id', prefix: 'tst' },
+            type: { field: 'constant', value: 'test' },
+            text: String,
+            anotherString: 'string',
+            num: Number,
+        };
+        cushion.model(schemaName, testSchema);
+    }
+
+
     var field;
     var schemaName = 'TestObj';
     var schema = {
@@ -221,6 +236,20 @@ describe('ObjectField', function() {
             });
 
             describe('and when setting from an id', function() {
+                var id = 'tst::1234-12341234-1234-12341';
+                var Model = cushion.model('Test');
+
+                it('should set', function(done) {
+
+                    field.set(id, function(err, model, res) {
+                        if (err) throw err;
+
+                        // model._model.should.match(Model);
+                        model._value.id.should.equal(id);
+                        done();
+                    });
+
+                });
             });
         });
 
@@ -308,6 +337,19 @@ describe('ObjectField', function() {
             });
 
             describe('and when setting from an id', function() {
+                var id = 'tst::1234-12341234-1234-12341';
+                var Model = cushion.model('Test');
+
+
+                it('should set', function(done) {
+                    field.set(id, function(err, model, res) {
+                        if (err) throw err;
+
+                        model._model.should.match(Model);
+                        model._value.id.should.equal(id);
+                        done();
+                    });
+                });
             });
 
         });

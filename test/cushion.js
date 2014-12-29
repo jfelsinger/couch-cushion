@@ -91,7 +91,8 @@ describe('Couch Cushion', function() {
         });
 
         it('should create model from valid schema', function(done) {
-            cushion.model(schemaName, testSchema);
+            if (!cushion._models.Test)
+                cushion.model(schemaName, testSchema);
 
             cushion._models.should.have.property(schemaName);
 

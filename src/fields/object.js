@@ -135,7 +135,7 @@ FieldObject.prototype.set = function setter(value, cb) {
                         throw err;
                 }
 
-                this.set(model);
+                self.set(model, cb);
 
             }, this._model, this.options.bucket);
 
@@ -168,7 +168,7 @@ FieldObject.prototype.set = function setter(value, cb) {
                         throw err;
                 }
 
-                this.set(model);
+                self.set(model, cb);
 
             }, this._model, this.options.bucket);
 
