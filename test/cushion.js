@@ -3,6 +3,7 @@
 var Fields = require('../src/fields'),
     Couchbase = require('couchbase'),
     Model = require('../src/model'),
+    Schema = require('../src/schema'),
     cushion = require('../src'),
     bucket = require('../lib/mocks/bucket');
 
@@ -17,6 +18,13 @@ describe('Couch Cushion', function() {
         anotherString: 'string',
         num: Number,
     };
+    var advancedSchema = new Schema(testSchema);
+    advancedSchema.compute('bothStrings', function() {
+        return this.text + this.anotherString;
+    });
+    advancedSchema.method('greet', function() {
+        this.text = 'HELLO';
+    });
 
     it('should be', function(done) {
 
@@ -105,6 +113,34 @@ describe('Couch Cushion', function() {
                 model._fields.should.have.property(key);
                 model.should.have.property(key);
             }
+
+            done();
+        });
+
+        it('should create a model with computed properties', function(done) {
+            var Model = cushion.model('Advanced', advancedSchema);
+            var model = new Model();
+
+            model._computed.should.have.property('bothStrings');
+            model.should.have.property('bothStrings');
+
+            model.text = 'Gree';
+            model.anotherString = 'tings!';
+
+            model.bothStrings.should.equal('Greetings!');
+
+            done();
+        });
+
+        it('should create a model with methods', function(done) {
+            var Model = cushion.model('Advanced');
+            var model = new Model();
+
+            model._methods.should.have.property('greet');
+            model.should.have.property('greet');
+
+            model.greet();
+            model.text.should.equal('HELLO');
 
             done();
         });

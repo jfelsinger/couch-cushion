@@ -7,6 +7,8 @@ var Fields = require('./fields'),
 function Model(options) {
     this.options = {};
     this._fields = {};
+    this._computed = {};
+    this._methods = {};
 
     if (options && typeof(options) !== 'object')
         throw new Error('Attempted to construct model with invalid options parameter');

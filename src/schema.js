@@ -6,7 +6,7 @@ function Schema(schema) {
     this.methods = {};
 }
 
-Schema.prototype.computed = function(name, getter, setter) {
+Schema.prototype.compute = function(name, getter, setter) {
     var computed = {};
 
     if (!name || typeof(name) !== 'string')
@@ -27,6 +27,27 @@ Schema.prototype.computed = function(name, getter, setter) {
     this.computed[name] = computed;
 
     return this;
+};
+
+Schema.prototype.method = function() {
+    var name, method;
+
+    if (arguments.length === 1) {
+        method = arguments[0];
+        if (method && typeof(method) === 'function')
+            name = method.name;
+    } else if (arguments.length === 2) {
+        name = arguments[0];
+        method = arguments[1];
+    }
+
+    if (!name || typeof(name) !== 'string' || name === '')
+        throw new Error('attempted to add a method with invalid name');
+
+    if (!method || typeof(method) !== 'function')
+        throw new Error('attempted to set invalid method');
+
+    this.methods[name] = method;
 };
 
 
