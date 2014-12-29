@@ -2,7 +2,8 @@
 
 var Couchbase = require('couchbase');
 
-var Model = require('./model');
+var Model = require('./model'),
+    Schema = require('./schema');
 
 /**
  * An ODM class for communicating with Couchbase
@@ -14,6 +15,10 @@ function CouchCushion() {
     this.options = {};
 
 }
+
+
+// Expose the schema class
+CouchCushion.prototype.Schema = Schema; 
 
 
 /**

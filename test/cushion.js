@@ -43,6 +43,9 @@ describe('Couch Cushion', function() {
         cushion.should.have.property('fromView');
         cushion.should.have.property('oneFromView');
 
+        cushion.should.have.property('Schema');
+        cushion.Schema.should.match(Schema);
+
         done();
     });
 
