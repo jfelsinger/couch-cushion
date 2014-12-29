@@ -1,3 +1,3 @@
-var CouchCushion = require('./src'),
+var CouchCushion = require('./src');
 
 module.exports = exports = CouchCushion;
