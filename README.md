@@ -4,7 +4,7 @@
 ### Installation
 
 ```
-npm install --save git@bitbucket.org:iconiqgmbh/couch-cushion-odm.git
+npm install --save git+ssh://git@bitbucket.org:iconiqgmbh/couch-cushion-odm.git
 ```
 
 ---
