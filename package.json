@@ -6,8 +6,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Joel Felsinger <jffelsinger@gmail.com> (http://joelfredrick.com/)",
-  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git@bitbucket.org:iconiqgmbh/couch-cushion-odm.git"
+  },
+  "author": "",
   "devDependencies": {
     "should": "^4.4.1",
     "mocha": "^2.1.0",
