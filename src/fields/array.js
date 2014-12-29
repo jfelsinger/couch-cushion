@@ -13,17 +13,25 @@ function FieldArray() {
 FieldArray.prototype = Object.create(Field.prototype);
 FieldArray.prototype.constructor = FieldArray;
 
-FieldArray.prototype._ = 
+/**
+ * Returns the actual value so we can manipulate it directly
+ */
 FieldArray.prototype.array = 
 FieldArray.prototype.getArray = 
 function getArray() {
     return this._value;
 };
 
+/**
+ * Returns this, so that we can have access to all of our functions and such
+ */
 FieldArray.prototype.get = function get() {
     return this;
 };
 
+/**
+ * Sets the value, updates any extra properties
+ */
 FieldArray.prototype.set = function set(value) {
     if (!value || typeof(value) !== 'object')
         throw new Error('attempted to set a non-array-like value on array field');
@@ -37,6 +45,9 @@ FieldArray.prototype.set = function set(value) {
 };
 
 
+/**
+ * Try and save all of the elements of the array
+ */
 FieldArray.prototype.save = function saveArray() {
     for (var key in this._value) {
         var value = this._value[key];
@@ -66,5 +77,10 @@ FieldArray.prototype.getValue = function getValue(getAll) {
 };
 
 
+// Create a property for easier dealing with the array
+Object.defineProperty(FieldArray.prototype, '_', {
+    get: FieldArray.prototype.getArray,
+    set: FieldArray.prototype.set
+});
 
 module.exports = FieldArray;

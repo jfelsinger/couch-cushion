@@ -4,6 +4,11 @@ var Couchbase = require('couchbase');
 
 var Model = require('./model');
 
+/**
+ * An ODM class for communicating with Couchbase
+ *
+ * @class
+ */
 function CouchCushion() {
     this._models = {};
     this.options = {};
@@ -11,6 +16,12 @@ function CouchCushion() {
 }
 
 
+/**
+ * Connect to a Couchbase cluster and specified bucket
+ *
+ * @param {{host: string, bucket: string, bucketPassword: string}} options
+ * @returns {CouchCushion}
+ */
 CouchCushion.prototype.connect = function connect(options) {
     if (typeof(options.host) !== 'string' ||
         typeof(options.bucket) !== 'string')
@@ -28,6 +39,13 @@ CouchCushion.prototype.connect = function connect(options) {
 };
 
 
+/**
+ * Sets or gets an option
+ *
+ * @param {string} option
+ * @param {*} [value]
+ * @returns {*}
+ */
 CouchCushion.prototype.getOption =
 CouchCushion.prototype.setOption = function(option, value) {
     if (arguments.length === 2) {
@@ -45,7 +63,11 @@ CouchCushion.prototype.setOption = function(option, value) {
 
 
 /**
- * Create a model that can be used
+ * Create a model that can be used, or return a model
+ *
+ * @param {string} name
+ * @param {Object|Schema} [schema]
+ * @returns {Model}
  */
 CouchCushion.prototype.model = function buildModel(name, schema) {
 
@@ -80,6 +102,14 @@ CouchCushion.prototype.model = function buildModel(name, schema) {
 };
 
 
+/**
+ * Save a document/model to the database
+ *
+ * @param {Model}
+ * @param {*} [cb]
+ * @param {*} [bucket]
+ * @returns {CouchCushion}
+ */
 CouchCushion.prototype.save = function(docs, cb, bucket) {
     bucket = bucket || this.options.bucket;
 
@@ -94,6 +124,12 @@ CouchCushion.prototype.save = function(docs, cb, bucket) {
 };
 
 
+/**
+ * Gets a model from the model list
+ *
+ * @param {Model|string} model
+ * @returns {Model}
+ */
 CouchCushion.prototype.getModel = function(model) {
     var result;
 
@@ -109,6 +145,15 @@ CouchCushion.prototype.getModel = function(model) {
 };
 
 
+/**
+ * Get a document
+ *
+ * @param {string} id
+ * @param {*} cb
+ * @param {Model|string} model - The model type that will be returned
+ * @param {*} bucket
+ * @returns {CouchCushion}
+ */
 CouchCushion.prototype.get = function(id, cb, model, bucket) {
     bucket = bucket || this.options.bucket;
     var self = this,
@@ -136,8 +181,21 @@ CouchCushion.prototype.get = function(id, cb, model, bucket) {
 
         cb(err, model, res);
     });
+
+    return this;
 };
 
+/**
+ * Get a single document from a search
+ *
+ * @param {Model|string} model - The model type that will be returned
+ * @param {*} cb
+ * @param {*} search - A Couchbase query to be executed
+ * @param {*} key
+ * @param {string} doc - A document name, for a view query
+ * @param {*} bucket
+ * @returns {CouchCushion}
+ */
 CouchCushion.prototype.getOne = function(model, cb, search, key, doc, bucket) {
     if (search instanceof Couchbase.ViewQuery || 
        (search.keys && search.key && search.from)) {
@@ -151,6 +209,17 @@ CouchCushion.prototype.getOne = function(model, cb, search, key, doc, bucket) {
     }
 };
 
+/**
+ * Get an array of documents from a search
+ *
+ * @param {Model|string} model - The model type that will be returned
+ * @param {*} cb
+ * @param {*} search - A Couchbase query to be executed
+ * @param {*} key
+ * @param {string} doc - A document name, for a view query
+ * @param {*} bucket
+ * @returns {CouchCushion}
+ */
 CouchCushion.prototype.getMany = function(model, cb, search, key, doc, bucket) {
     if (search instanceof Couchbase.ViewQuery || 
        (search.keys && search.key && search.from)) {
@@ -167,6 +236,15 @@ CouchCushion.prototype.getMany = function(model, cb, search, key, doc, bucket) {
 
 // Query
 
+/**
+ * Get a document from a query
+ *
+ * @param {Model|string} model - The model type that will be returned
+ * @param {*} cb
+ * @param {*} query - A Couchbase query to be executed
+ * @param {*} bucket
+ * @returns {CouchCushion}
+ */
 CouchCushion.prototype.fromQuery = function(model, cb, query, bucket) {
     bucket = bucket || this.options.bucket;
     var Model = this.getModel(model);
@@ -189,6 +267,15 @@ CouchCushion.prototype.fromQuery = function(model, cb, query, bucket) {
     return this;
 };
 
+/**
+ * Get a single document from a query
+ *
+ * @param {Model|string} model - The model type that will be returned
+ * @param {*} cb
+ * @param {*} query - A Couchbase query to be executed
+ * @param {*} bucket
+ * @returns {CouchCushion}
+ */
 CouchCushion.prototype.oneFromQuery = function(model, cb, query, bucket) {
     bucket = bucket || this.options.bucket;
     var Model = this.getModel(model);
@@ -210,6 +297,9 @@ CouchCushion.prototype.oneFromQuery = function(model, cb, query, bucket) {
 
 // Views
 
+/**
+ * Build a view query
+ */
 function buildViewQuery(view, key, doc) {
     if (!doc) {
         // Get the document name
@@ -229,11 +319,33 @@ function buildViewQuery(view, key, doc) {
     return query;
 }
 
+/**
+ * Get an array of documents from a view query
+ *
+ * @param {Model|string} model - The model type that will be returned
+ * @param {*} cb
+ * @param {string} view - The view's name
+ * @param {*} key
+ * @param {string} doc - A document name, for a view query
+ * @param {*} bucket
+ * @returns {CouchCushion}
+ */
 CouchCushion.prototype.fromView = function(model, cb, view, key, doc, bucket) {
     var query = buildViewQuery(view, key, doc);
     return this.fromQuery(model, cb, query, bucket);
 };
 
+/**
+ * Get a single document from a view query
+ *
+ * @param {Model|string} model - The model type that will be returned
+ * @param {*} cb
+ * @param {string} view - The view's name
+ * @param {*} key
+ * @param {string} doc - A document name, for a view query
+ * @param {*} bucket
+ * @returns {CouchCushion}
+ */
 CouchCushion.prototype.oneFromView = function(model, cb, view, key, doc, bucket) {
     var query = buildViewQuery(view, key, doc);
     return this.oneFromQuery(model, cb, query, bucket);

@@ -1,7 +1,13 @@
 'use strict';
 
 
-
+/**
+ * Represents a field on a model/document
+ *
+ * @param {Object.<string,*>} options
+ * @param {*} value
+ * @class
+ */
 function Field(options, value) {
 
     if (!this.options) this.options = {};
@@ -17,14 +23,27 @@ function Field(options, value) {
                 readonly: false
             });
 
+    /** @access protected */
+    this._value = undefined;
+
     if (value !== undefined) this.set(value);
-    else this._value = undefined;
 }
 
+/**
+ * Returns the field's value
+ *
+ * @returns {*}
+ */
 Field.prototype.get = function getter() {
     return this._value;
 };
 
+/**
+ * Set the field's value
+ *
+ * @param {*} value
+ * @returns null
+ */
 Field.prototype.set = function setter(value) {
     if (this.options.readonly) {
         throw new Error('attempted to set value on read-only field');
@@ -33,10 +52,20 @@ Field.prototype.set = function setter(value) {
     this._value = value;
 };
 
+/**
+ * Returns a value representative of the field
+ *
+ * @returns {*}
+ */
 Field.prototype.getValue = function getValue() {
     return this.get();
 };
 
+/**
+ * Allow options to be set on construction for the field
+ *
+ * @returns {Field}
+ */
 Field.prototype.allowOptions = function() {
     if (!this.options) this.options = {};
 
@@ -62,6 +91,14 @@ Field.prototype.allowOptions = function() {
  * Pseudo-protected fields
  */
 
+/**
+ * Set the options on the field
+ *
+ * @param {Array} values
+ * @param {Array} defaults
+ * @access protected
+ * @returns {Field}
+ */
 Field.prototype._setOptions = function(values, defaults) {
     defaults = defaults || {};
 
@@ -86,9 +123,5 @@ Field.prototype._setOptions = function(values, defaults) {
 };
 
 
-
-/**
- * Exports
- */
 
 module.exports = Field;

@@ -47,6 +47,11 @@ module.exports.fields = fields;
 for (var field in fields)
     module.exports[field] = fields[field];
 
+/**
+ * Return a particuler field based on a schema structure
+ *
+ * @returns {Field}
+ */
 module.exports.get = 
 module.exports.getField = function getField(fieldName) {
     var field;
@@ -71,6 +76,11 @@ module.exports.getField = function getField(fieldName) {
     return field;
 };
 
+/**
+ * Build a schema structure and return a field based off of it
+ *
+ * @returns {Field}
+ */
 module.exports.buildScheme = function buildScheme(scheme, name) {
     if (typeof(scheme) === 'string' || typeof(scheme) === 'function') {
         scheme = {

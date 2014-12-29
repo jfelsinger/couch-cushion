@@ -1,11 +1,24 @@
 'use strict';
 
+/**
+ * Represents the structure of a document
+ *
+ * @class
+ */
 function Schema(schema) {
     this.schema = schema || {};
     this.computed = {};
     this.methods = {};
 }
 
+/**
+ * Add a field to the the computed properties object
+ *
+ * @param {string} name - name of the property
+ * @param {function} getter
+ * @param {function} setter
+ * @returns {Schema}
+ */
 Schema.prototype.compute = function(name, getter, setter) {
     var computed = {};
 
@@ -29,6 +42,11 @@ Schema.prototype.compute = function(name, getter, setter) {
     return this;
 };
 
+/**
+ * Add a method to the method object of the schema
+ *
+ * @returns {Schema}
+ */
 Schema.prototype.method = function() {
     var name, method;
 
@@ -48,6 +66,8 @@ Schema.prototype.method = function() {
         throw new Error('attempted to set invalid method');
 
     this.methods[name] = method;
+
+    return this;
 };
 
 

@@ -20,6 +20,29 @@ describe('ArrayField', function() {
         done();
     });
 
+    describe('#_', function() {
+        beforeEach(function() {
+            field = new ArrayField();
+            field.set(obj);
+        })
+
+        it('should exist', function(done) {
+            field.should.have.property('_');
+            done();
+        });
+
+        it('should give access to value', function(done) {
+            field._.should.match(obj);
+            done();
+        });
+
+        it('should be settable', function(done) {
+            field._ = arr;
+            field._.should.match(arr);
+            done();
+        });
+    });
+
     describe('#set', function() {
         beforeEach(function() {
             field = new ArrayField();

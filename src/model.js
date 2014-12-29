@@ -4,6 +4,9 @@
 var Fields = require('./fields'),
     Schema = require('./schema');
 
+/**
+ * @class
+ */
 function Model(options) {
     this.options = {};
     this._fields = {};
@@ -121,7 +124,7 @@ function _initFields(model) {
  *
  * { fieldName: 'value' }
  *
- * @return this
+ * @return {Model}
  */
 Model.prototype.set = 
 Model.prototype.primeData = 
@@ -138,6 +141,9 @@ function(data) {
     return this;
 };
 
+/**
+ * Save's the model to the bucket
+ */
 Model.prototype.save = function(cb, bucket) {
     bucket = bucket || this.options.bucket;
 
@@ -153,6 +159,13 @@ Model.prototype.save = function(cb, bucket) {
     return this;
 };
 
+/**
+ * Get a value representative of the entire model
+ *
+ * @param {boolean} getAll - whether or not to return full objects
+ * @param {boolean{ asJson - whether or not to return a json string
+ * @returns {*}
+ */
 Model.prototype.getValue = function(getAll, asJson) {
     var result = {};
 

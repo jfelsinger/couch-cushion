@@ -6,6 +6,11 @@ var Field = require('../field'),
     Model = require('../model'),
     cushion = require('..');
 
+/**
+ * Represents an model or sub-model on a document
+ *
+ * @class
+ */
 function FieldObject(options) {
     Field.apply(this, arguments);
 
@@ -23,6 +28,9 @@ FieldObject.prototype = Object.create(Field.prototype);
 FieldObject.prototype.constructor = FieldObject;
 
 
+/**
+ * Returns either a full object, or just an id based on the value of getAll
+ */
 FieldObject.prototype.getValue = function(getAll) {
     if (!this._isInitialized || !this._value)
         return null;
@@ -33,6 +41,9 @@ FieldObject.prototype.getValue = function(getAll) {
 };
 
 
+/**
+ * Save the represented model
+ */
 FieldObject.prototype.save = function(cb, bucket) {
     if (this._isInitialized && this._value)
         this._value.save(cb, bucket);
@@ -41,10 +52,17 @@ FieldObject.prototype.save = function(cb, bucket) {
 };
 
 
+/**
+ * Get the model type that is currently being represented
+ */
 FieldObject.prototype.getModelType = function() {
     return cushion.getModel(this._model);
 };
 
+/**
+ * Try to set the type of model the field represents, if it hasn't already been
+ * set
+ */
 FieldObject.prototype.setModelType = function(value) {
     if (this._isInitialized)
         throw new Error('attempted to set model type on already initialized object field');
@@ -67,6 +85,11 @@ FieldObject.prototype.get = function getter() {
     return this;
 };
 
+/**
+ * Try and set the field, by evaluating the type of value that is given
+ *
+ * A cb can be used, and will be called when the initialization is complete
+ */
 FieldObject.prototype.set = function setter(value, cb) {
     var self = this;
     var err;

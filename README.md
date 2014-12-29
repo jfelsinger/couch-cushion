@@ -1,7 +1,7 @@
 # Couch Cushion ODM
 ## A Node.js ODM for Couchbase
 
-#### Installation
+### Installation
 
 ```
 npm install --save git@bitbucket.org:iconiqgmbh/couch-cushion-odm.git
