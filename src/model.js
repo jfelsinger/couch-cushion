@@ -1,9 +1,6 @@
 'use strict';
 /* jslint latedef:false */
 
-var Fields = require('./fields'),
-    Schema = require('./schema');
-
 /**
  * @class
  */
@@ -29,6 +26,13 @@ function Model(options) {
     this._fields.id.generate(this._fields.type.get());
 }
 
+module.exports = Model;
+
+var Fields = require('./fields'),
+    Schema = require('./schema');
+
+
+
 // Default Schema
 Model.prototype.schema = {
     id: 'Id',
@@ -49,7 +53,7 @@ function _initFields(model) {
     var schema = model.schema;
 
     if (schema instanceof Schema || schema.schema) {
-        setSchema(schema.schema);
+        setSchema(schema.schema, model.cushion);
 
         if (schema.computed)
             setComputed(schema.computed);
@@ -58,7 +62,7 @@ function _initFields(model) {
             setMethods(schema.methods);
     } else {
         // Se assume that it is a basic object schema
-        setSchema(schema);
+        setSchema(schema, model.cushion);
     }
 
     function get(name) {
@@ -104,9 +108,10 @@ function _initFields(model) {
         }
     }
 
-    function setSchema(schema) {
+    function setSchema(schema, cushion) {
         for (var name in schema) {
-            var field = Fields.buildScheme(schema[name], name);
+            var field = Fields.buildScheme(schema[name], name, cushion);
+
             model._fields[name] = field;
 
             Object.defineProperty(model, name, {
@@ -128,14 +133,31 @@ function _initFields(model) {
  */
 Model.prototype.set = 
 Model.prototype.primeData = 
-function(data) {
+function(data, cb) {
     if (typeof(data) !== 'object' && typeof(data) !== 'function')
         throw new Error('Invalid parameter `data` given');
 
+    cb = cb || function(name, value) {
+        return function(err, obj, res) {
+            /*
+            console.log();
+            console.log('name: ' + name);
+            console.log('value: ', value);
+            console.log('---------------------------------');
+
+            console.log(err);
+            console.log(obj);
+            console.log(res);
+            */
+
+            return true;
+        };
+    };
+
     for (var key in data)
-        if (this._fields[key] && 
-           (this._fields[key] === undefined || !(this._fields[key] instanceof Fields.constant))) {
-            this._fields[key].set(data[key]);
+        if (this._fields[key] && this._fields[key] !== undefined &&
+          !(this._fields[key] instanceof Fields.constant)) {
+            this._fields[key].set(data[key], cb(key, data[key]));
         }
 
     return this;
@@ -176,7 +198,3 @@ Model.prototype.getValue = function(getAll, asJson) {
 
     return result;
 };
-
-
-
-module.exports = Model;

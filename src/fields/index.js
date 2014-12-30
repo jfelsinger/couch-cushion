@@ -81,7 +81,7 @@ module.exports.getField = function getField(fieldName) {
  *
  * @returns {Field}
  */
-module.exports.buildScheme = function buildScheme(scheme, name) {
+module.exports.buildScheme = function buildScheme(scheme, name, cushion) {
     if (typeof(scheme) === 'string' || typeof(scheme) === 'function') {
         scheme = {
             field: scheme
@@ -96,7 +96,7 @@ module.exports.buildScheme = function buildScheme(scheme, name) {
     var value = scheme.value;
     var field = this.getField(scheme.field);
 
-    scheme = new field(scheme, value);
+    scheme = new field(scheme, value, cushion);
 
     return scheme;
 };

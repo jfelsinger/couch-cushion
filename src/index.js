@@ -2,9 +2,6 @@
 
 var Couchbase = require('couchbase');
 
-var Model = require('./model'),
-    Schema = require('./schema');
-
 /**
  * An ODM class for communicating with Couchbase
  *
@@ -15,6 +12,12 @@ function CouchCushion() {
     this.options = {};
 
 }
+
+module.exports = exports = new CouchCushion();
+
+var Model = require('./model'),
+    Schema = require('./schema');
+
 
 
 // Expose the schema class
@@ -92,6 +95,7 @@ CouchCushion.prototype.model = function buildModel(name, schema) {
 
         model.prototype = Object.create(Model.prototype);
         model.prototype.constructor = model;
+        model.prototype.cushion = this;
 
         // TODO: validate the schema before applying it
         model.prototype.schema = schema;
@@ -401,9 +405,3 @@ CouchCushion.prototype.oneFromView = function(model, cb, view, key, doc, bucket)
     var query = buildViewQuery(view, key, doc);
     return this.oneFromQuery(model, cb, query, bucket);
 };
-
-
-
-
-
-module.exports = exports = new CouchCushion();

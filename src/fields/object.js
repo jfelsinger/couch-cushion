@@ -4,18 +4,20 @@ require('../../lib/capitalize');
 
 var Field = require('../field'),
     Model = require('../model'),
-    cushion = require('../..');
+    cushion;
 
 /**
  * Represents an model or sub-model on a document
  *
  * @class
  */
-function FieldObject(options) {
+function FieldObject(options, value, _cushion) {
     Field.apply(this, arguments);
 
     this._isInitialized = false;
     this._model = undefined;
+
+    cushion = _cushion || require('couch-cushion');
 
     if (options) {
 
@@ -26,6 +28,9 @@ function FieldObject(options) {
 
 FieldObject.prototype = Object.create(Field.prototype);
 FieldObject.prototype.constructor = FieldObject;
+
+module.exports = FieldObject;
+
 
 
 /**
@@ -69,12 +74,12 @@ FieldObject.prototype.setModelType = function(value) {
     if (this._model)
         throw new Error('attempted to change model type on object field');
 
-    var Model = cushion.getModel(value);
+    var RequestModel = cushion.getModel(value);
 
-    if (!Model)
+    if (!RequestModel)
         throw new Error('model type not found');
 
-    this._model = Model;
+    this._model = RequestModel;
     this._isInitialized = true;
 
     return this;
@@ -94,9 +99,14 @@ FieldObject.prototype.set = function setter(value, cb) {
     var self = this;
     var err;
 
+    // Why in the world do I have to do this? I don't have the slightest clue,
+    // but it must be done... for now.
+    // cushion = require('couch-cushion');
+    // Model = require('../model');
+
     if (!this._isInitialized) {
 
-        if (typeof(value) === 'function') {
+        if (value && typeof(value) === 'function') {
             // assume that it's an uninitizlied model
 
             this.setModelType(value);
@@ -106,7 +116,7 @@ FieldObject.prototype.set = function setter(value, cb) {
             this._isInitialized = true;
             if (cb && typeof(cb) === 'function') cb(null, this);
 
-        } else if (typeof(value) === 'object' && value.type) {
+        } else if (value && typeof(value) === 'object' && value.type) {
 
             if (!(value instanceof Model)) {
                 // It's an object full of values to be set, get a model from it
@@ -126,8 +136,8 @@ FieldObject.prototype.set = function setter(value, cb) {
             this._isInitialized = true;
             if (cb && typeof(cb) === 'function') cb(null, this);
 
-        } else if (typeof(value) === 'string') {
-
+        } else if (value && typeof(value) === 'string') {
+            
             // Assume the value is an id, try to work from there
             cushion.get(value, function(err, model, res) {
                 if (err) {
@@ -182,8 +192,3 @@ FieldObject.prototype.set = function setter(value, cb) {
 
     return this;
 };
-
-
-
-
-module.exports = FieldObject;

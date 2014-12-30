@@ -198,7 +198,7 @@ describe('Couch Cushion', function() {
             var cb = function(err, model, res) {
                 var Model = cushion.model('Test');
 
-                (model === undefined).should.false;
+                (model === null).should.false;
                 model.should.be.an.instanceof(Model);
 
                 done();
