@@ -150,6 +150,28 @@ CouchCushion.prototype.getModel = function(model) {
 };
 
 
+function getResults(response) {
+    var value = response;
+
+    if (value.rows)
+        return getResults(value.rows);
+
+    if (value.value)
+        return getResults(value.value);
+
+    return value;
+}
+
+function getOneResult(response) {
+    var value = getResults(response);
+
+    if (value.length)
+        return getOneResult(value[0]);
+
+    return value;
+}
+
+
 /**
  * Get a document
  *
@@ -258,12 +280,16 @@ CouchCushion.prototype.fromQuery = function(model, cb, query, bucket) {
         if (err) return cb(err, null, res);
         var models = [];
 
-        if (res && res.rows) {
-            for (var i = 0; i < res.rows.length; i++) {
+        if (res) {
+            var values = getResults(res);
+
+            for (var i = 0; i < values.length; i++) {
                 var resultModel = new Model({ bucket: bucket });
-                resultModel.set(res.rows[i].value);
+                resultModel.set(values[i].value);
                 models.push(resultModel);
             }
+        } else {
+            err = new Error('could not get documents from bucket');
         }
 
         cb(err, models, res);
@@ -286,14 +312,19 @@ CouchCushion.prototype.oneFromQuery = function(model, cb, query, bucket) {
     var Model = this.getModel(model);
 
     bucket.query(query, function(err, res) {
+        var resultModel = null;
         if (err) return cb(err, null, res);
 
-        if (res && res.rows && res.rows.length) {
-            var resultModel = new Model({ bucket: bucket });
-            resultModel.set(res.rows[0].value);
-
-            cb(err, resultModel, res);
+        if (res) {
+            resultModel = new Model({ bucket: bucket });
+            resultModel.set(getOneResult(res));
         }
+
+        if (!res || !resultModel) {
+            err = new Error('could not get document from bucket');
+        }
+
+        return cb(err, resultModel, res);
     });
 
     return this;
@@ -312,14 +343,19 @@ function buildViewQuery(view, key, doc) {
 
     var query = Couchbase.ViewQuery.from(doc, view);
 
-    if (Array.isArray(key))
-        query = query.keys(key);
-    else if (key.id)
-        query = query.key(key.id);
-    else if (key._fields && key._fields.id)
-        query = query.key(key._fields.id.get());
-    else
-        query = query.key(key);
+    if (key) {
+        if (Array.isArray(key))
+            query = query.keys(key);
+
+        else if (key.id)
+            query = query.key(key.id);
+
+        else if (key._fields && key._fields.id)
+            query = query.key(key._fields.id.get());
+
+        else
+            query = query.key(key);
+    }
 
     return query;
 }

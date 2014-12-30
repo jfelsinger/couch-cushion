@@ -211,7 +211,7 @@ describe('Couch Cushion', function() {
 
     describe('#getOne', function() {
 
-        it('should run a callback with a constructed model', function(done) {
+        it('should run a callback from a query', function(done) {
             var cb = function(err, model, res) {
                 var Model = cushion.model('Test');
 
@@ -226,9 +226,67 @@ describe('Couch Cushion', function() {
             cushion.getOne('Test', cb, search);
         });
 
+        it('should run a callback for a view query', function(done) {
+            var cb = function(err, model, res) {
+                var Model = cushion.model('Test');
+
+                (model === undefined).should.false;
+                model.should.be.an.instanceof(Model);
+
+                done();
+            };
+
+            cushion.getOne('Test', cb, 'view');
+        });
+
+        it('should run a callback for a view query when key is given', function(done) {
+            var cb = function(err, model, res) {
+                var Model = cushion.model('Test');
+
+                (model === undefined).should.false;
+                model.should.be.an.instanceof(Model);
+
+                done();
+            };
+
+            cushion.getOne('Test', cb, 'view', 'key');
+        });
+
+        it('should run a callback for a view query when key and doc given', function(done) {
+            var cb = function(err, model, res) {
+                var Model = cushion.model('Test');
+
+                (model === undefined).should.false;
+                model.should.be.an.instanceof(Model);
+
+                done();
+            };
+
+            cushion.getOne('Test', cb, 'view', 'key', 'doc');
+        });
+
     });
 
     describe('#getMany', function() {
+
+        it('should run a callback from a query', function(done) {
+            var cb = function(err, models, res) {
+                var Model = cushion.model('Test');
+
+                (models === undefined).should.false;
+                models.should.be.an.Array;
+                models.should.matchEach(function (it) {
+                    return it instanceof Model;
+                });
+
+                done();
+            };
+
+            var search = Couchbase.ViewQuery.from('doc', 'view');
+
+            cushion.getMany('Test', cb, search);
+        });
+
     });
 
     describe('#fromQuery', function() {
