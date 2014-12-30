@@ -188,8 +188,30 @@ Model.prototype.save = function(cb, bucket) {
  * @param {boolean{ asJson - whether or not to return a json string
  * @returns {*}
  */
-Model.prototype.getValue = function(getAll, asJson) {
+Model.prototype.getValue = function(getAll, asJson, withComputed, withMethods) {
     var result = {};
+
+    if (withComputed)
+        for (var key in this._computed) {
+            var computed = this._computed[key];
+            if (computed.setter)
+                Object.defineProperty(result, key, {
+                    enumerable: true,
+                    get: computed.getter,
+                    set: computed.setter,
+                });
+            else
+                Object.defineProperty(result, key, {
+                    enumerable: true,
+                    get: computed.getter,
+                });
+        }
+
+    if (withMethods)
+        for (var key in this._methods)
+            Object.defineProperty(result, key, {
+                value: this._methods[key]
+            });
 
     for (var key in this._fields)
         result[key] = this._fields[key].getValue(getAll);
