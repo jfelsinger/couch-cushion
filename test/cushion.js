@@ -211,11 +211,16 @@ describe('Couch Cushion', function() {
 
     describe('#getOne', function() {
 
+        it('should throw on invalid model', function(done) {
+            cushion.getOne.bind(cushion, 'BLARGH', 'test').should.throw();
+            done();
+        });
+
         it('should run a callback from a query', function(done) {
             var cb = function(err, model, res) {
                 var Model = cushion.model('Test');
 
-                (model === undefined).should.false;
+                (model === null).should.false;
                 model.should.be.an.instanceof(Model);
 
                 done();
@@ -230,7 +235,7 @@ describe('Couch Cushion', function() {
             var cb = function(err, model, res) {
                 var Model = cushion.model('Test');
 
-                (model === undefined).should.false;
+                (model === null).should.false;
                 model.should.be.an.instanceof(Model);
 
                 done();
@@ -243,7 +248,7 @@ describe('Couch Cushion', function() {
             var cb = function(err, model, res) {
                 var Model = cushion.model('Test');
 
-                (model === undefined).should.false;
+                (model === null).should.false;
                 model.should.be.an.instanceof(Model);
 
                 done();
@@ -256,7 +261,7 @@ describe('Couch Cushion', function() {
             var cb = function(err, model, res) {
                 var Model = cushion.model('Test');
 
-                (model === undefined).should.false;
+                (model === null).should.false;
                 model.should.be.an.instanceof(Model);
 
                 done();
@@ -273,7 +278,7 @@ describe('Couch Cushion', function() {
             var cb = function(err, models, res) {
                 var Model = cushion.model('Test');
 
-                (models === undefined).should.false;
+                (models === null).should.false;
                 models.should.be.an.Array;
                 models.should.matchEach(function (it) {
                     return it instanceof Model;

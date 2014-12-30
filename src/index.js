@@ -274,7 +274,12 @@ CouchCushion.prototype.getMany = function(model, cb, search, key, doc, bucket) {
  */
 CouchCushion.prototype.fromQuery = function(model, cb, query, bucket) {
     bucket = bucket || this.options.bucket;
-    var Model = this.getModel(model);
+    var RequestModel = this.getModel(model);
+
+    if (!(RequestModel && RequestModel.prototype instanceof Model)) {
+        var err = new Error('requested model type `'+model+'` not found');
+        return cb(err, null, null);
+    }
 
     bucket.query(query, function(err, res) {
         if (err) return cb(err, null, res);
@@ -284,7 +289,7 @@ CouchCushion.prototype.fromQuery = function(model, cb, query, bucket) {
             var values = getResults(res);
 
             for (var i = 0; i < values.length; i++) {
-                var resultModel = new Model({ bucket: bucket });
+                var resultModel = new RequestModel({ bucket: bucket });
                 resultModel.set(values[i].value);
                 models.push(resultModel);
             }
@@ -309,14 +314,19 @@ CouchCushion.prototype.fromQuery = function(model, cb, query, bucket) {
  */
 CouchCushion.prototype.oneFromQuery = function(model, cb, query, bucket) {
     bucket = bucket || this.options.bucket;
-    var Model = this.getModel(model);
+    var RequestModel = this.getModel(model);
+
+    if (!(RequestModel && RequestModel.prototype instanceof Model)) {
+        var err = new Error('requested model type `'+model+'` not found');
+        return cb(err, null, null);
+    }
 
     bucket.query(query, function(err, res) {
         var resultModel = null;
         if (err) return cb(err, null, res);
 
         if (res) {
-            resultModel = new Model({ bucket: bucket });
+            resultModel = new RequestModel({ bucket: bucket });
             resultModel.set(getOneResult(res));
         }
 
