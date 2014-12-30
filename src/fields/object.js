@@ -4,7 +4,7 @@ require('../../lib/capitalize');
 
 var Field = require('../field'),
     Model = require('../model'),
-    cushion = require('..');
+    cushion = require('../..');
 
 /**
  * Represents an model or sub-model on a document
