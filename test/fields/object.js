@@ -51,6 +51,21 @@ describe('ObjectField', function() {
         done();
     });
 
+    it('should support more complex models', function(done) {
+        field = new ObjectField();
+        var SimpleModel = cushion.model('Test');
+        var ComplexModel = cushion.model('TestObj');
+
+        var simple = new SimpleModel();
+        var complex = new ComplexModel();
+
+        complex.obj = simple;
+
+        var complexCopy = new ComplexModel(complex.getValue());
+
+        done();
+    });
+
     describe('#getValue', function() {
         beforeEach(function() {
             field = new ObjectField();
