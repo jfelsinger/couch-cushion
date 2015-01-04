@@ -32,7 +32,8 @@ describe('DateField', function() {
             var field = new DateField();
             var value = new Date();
 
-            (field.get() === undefined).should.be.true;
+            (field.get() === undefined).should.be.false;
+            field.get().should.be.a.Date;
             field.set(value);
             field.get().should.match(value);
 
@@ -47,7 +48,8 @@ describe('DateField', function() {
             var field = new DateField();
             var value = new Date();
 
-            (field._value === undefined).should.be.true;
+            (field._value === undefined).should.be.false;
+            field._value.should.be.a.Date;
             field.set(value);
             field._value.should.match(value);
 

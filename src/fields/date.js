@@ -4,6 +4,10 @@ var Field = require('../field');
 
 function FieldDate() {
     Field.apply(this, arguments);
+
+    // Make sure that the value is set correctly
+    if (!this._value)
+        this.set(new Date());
 }
 
 FieldDate.prototype = Object.create(Field.prototype);

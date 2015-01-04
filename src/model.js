@@ -23,7 +23,8 @@ function Model(options) {
 
     _initFields(this);
 
-    this._fields.id.generate(this._fields.type.get());
+    if (this._fields.id)
+        this._fields.id.generate(this._fields.type.get());
 }
 
 module.exports = Model;
@@ -177,7 +178,7 @@ Model.prototype.save = function(cb, bucket) {
         if (this._fields[key].save && typeof(this._fields[key].save) === 'function')
             this._fields[key].save();
 
-    bucket.upsert(this._fields.id.get,this.getValue, cb);
+    bucket.upsert(this._fields.id.get(), this.getValue(), cb);
     return this;
 };
 
@@ -189,10 +190,11 @@ Model.prototype.save = function(cb, bucket) {
  * @returns {*}
  */
 Model.prototype.getValue = function(getAll, asJson, withComputed, withMethods) {
+    var key;
     var result = {};
 
     if (withComputed)
-        for (var key in this._computed) {
+        for (key in this._computed) {
             var computed = this._computed[key];
             if (computed.setter)
                 Object.defineProperty(result, key, {
@@ -208,12 +210,12 @@ Model.prototype.getValue = function(getAll, asJson, withComputed, withMethods) {
         }
 
     if (withMethods)
-        for (var key in this._methods)
+        for (key in this._methods)
             Object.defineProperty(result, key, {
                 value: this._methods[key]
             });
 
-    for (var key in this._fields)
+    for (key in this._fields)
         result[key] = this._fields[key].getValue(getAll);
 
     if (asJson) result = JSON.stringify(result);

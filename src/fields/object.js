@@ -15,6 +15,7 @@ function FieldObject(options, value, _cushion) {
     Field.apply(this, arguments);
 
     this._isInitialized = false;
+    this._isLoaded = false;
     this._model = undefined;
 
     cushion = _cushion || require('couch-cushion');
@@ -37,8 +38,8 @@ module.exports = FieldObject;
  * Returns either a full object, or just an id based on the value of getAll
  */
 FieldObject.prototype.getValue = function(getAll) {
-    if (!this._isInitialized || !this._value)
-        return null;
+    if (!this._isLoaded)
+        return this._value;
 
     return getAll ?
         this._value.getValue(getAll) :
@@ -50,7 +51,7 @@ FieldObject.prototype.getValue = function(getAll) {
  * Save the represented model
  */
 FieldObject.prototype.save = function(cb, bucket) {
-    if (this._isInitialized && this._value)
+    if (this._isLoaded && this._value)
         this._value.save(cb, bucket);
 
     return this;
@@ -90,6 +91,22 @@ FieldObject.prototype.get = function getter() {
     return this;
 };
 
+FieldObject.prototype.load = function load(cb, id) {
+    if (!this._isLoaded) {
+        var self = this;
+        id = id || this._value;
+
+        cushion.get(this._value, function(err, model, res) {
+            if (err) { return cb(err, model, res); }
+
+            self.set(model, cb);
+
+        }, this._model, this.options.bucket);
+    }
+
+    return this;
+};
+
 /**
  * Try and set the field, by evaluating the type of value that is given
  *
@@ -114,6 +131,8 @@ FieldObject.prototype.set = function setter(value, cb) {
             this._value = new value();
             /* jslint +W055 */
             this._isInitialized = true;
+            this._isLoaded = true;
+
             if (cb && typeof(cb) === 'function') cb(null, this);
 
         } else if (value && typeof(value) === 'object' && value.type) {
@@ -133,21 +152,17 @@ FieldObject.prototype.set = function setter(value, cb) {
 
             this.setModelType(value.type.capitalize());
             this._value = value;
+            console.log('                   +1 ');
+            return;
             this._isInitialized = true;
+            this._isLoaded = true;
             if (cb && typeof(cb) === 'function') cb(null, this);
 
         } else if (value && typeof(value) === 'string') {
             
             // Assume the value is an id, try to work from there
-            cushion.get(value, function(err, model, res) {
-                if (err) {
-                    if (!cb || typeof(cb) !== 'function' || cb(err, self, res) != true)
-                        throw err;
-                }
-
-                self.set(model, cb);
-
-            }, this._model, this.options.bucket);
+            this._value = value;
+            if (cb && typeof(cb) === 'function') cb(null, this);
 
         } else {
             err = new Error('value can not be used to generate a new object on an un-initialized object field');
@@ -161,6 +176,7 @@ FieldObject.prototype.set = function setter(value, cb) {
 
             // It's an actual model, set it
             this._value = value;
+            this._isLoaded = true;
             if (cb && typeof(cb) === 'function') cb(null, this);
 
         } else if (typeof(value) === 'object') {
@@ -168,19 +184,14 @@ FieldObject.prototype.set = function setter(value, cb) {
             // It's model data, create a new model and set it
             this._value = new this._model();
             this._value.set(value);
+            this._isLoaded = true;
             if (cb && typeof(cb) === 'function') cb(null, this);
 
         } else if (typeof(value) === 'string') {
             // It's an id
-            cushion.get(value, function(err, model, res) {
-                if (err) {
-                    if (!cb || typeof(cb) !== 'function' || cb(err, self, res) != true)
-                        throw err;
-                }
-
-                self.set(model, cb);
-
-            }, this._model, this.options.bucket);
+            this._value = value;
+            this._isLoaded = false;
+            if (cb && typeof(cb) === 'function') cb(null, this);
 
         } else {
             err = new Error('attempted to set invalid value on object field');

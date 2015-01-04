@@ -73,7 +73,7 @@ describe('ObjectField', function() {
 
         describe('when uninitialized', function() {
             it('should return null when uninitialized', function(done) {
-                (field.getValue() === null).should.be.true;
+                (field.getValue() === undefined).should.be.true;
                 done();
             });
         });
@@ -87,6 +87,7 @@ describe('ObjectField', function() {
             });
 
             it('should return an id by default', function(done) {
+                console.log('loaded: ',field._isLoaded);
                 field.getValue().should.equal(model.id);
                 done();
             });
@@ -254,13 +255,13 @@ describe('ObjectField', function() {
                 var id = 'tst::1234-12341234-1234-12341';
                 var Model = cushion.model('Test');
 
-                it('should set', function(done) {
+                it('should just set an id', function(done) {
 
                     field.set(id, function(err, model, res) {
                         if (err) throw err;
 
                         // model._model.should.match(Model);
-                        model._value.id.should.equal(id);
+                        model._value.should.equal(id);
                         done();
                     });
 
@@ -356,12 +357,13 @@ describe('ObjectField', function() {
                 var Model = cushion.model('Test');
 
 
-                it('should set', function(done) {
+                it('should only set id', function(done) {
                     field.set(id, function(err, model, res) {
                         if (err) throw err;
 
-                        model._model.should.match(Model);
-                        model._value.id.should.equal(id);
+                        model._value.should.equal(id);
+                        model._isLoaded.should.be.false;
+
                         done();
                     });
                 });
