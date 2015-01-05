@@ -67,7 +67,9 @@ FieldArray.prototype.getValue = function getValue(getAll) {
     for (var key in this._value) {
         var value = this._value[key];
 
-        if (value.getValue)
+        if (typeof(value.getInline) === 'function')
+            results[key] = value.getInline();
+        if (typeof(value.getValue) === 'function')
             results[key] = (value.getValue(getAll));
         else
             results[key] = (value);
