@@ -221,6 +221,20 @@ Model.prototype.getValue = function(getAll, asJson, withComputed, withMethods) {
                 value: this._methods[key]
             });
 
+    // This adds all of the fields and their values to the result, which will
+    // then go to the db. Question:
+    //
+    // We don't have to, but should we include fields that have a non-set or 
+    // falsy values? undefined, null, and '' are all pretty much equvalent to no
+    // value being there at all. We could save some space by filtering out these
+    // values when saving to the db.
+    //
+    // pros:
+    //  - saves space
+    // cons:
+    //  - might cause issues with implementations on other systems
+    //  - logic to filter out the values might slow things down
+    //      if (value != false || value === false)
     for (key in this._fields)
         result[key] = this._fields[key].getValue(getAll);
 

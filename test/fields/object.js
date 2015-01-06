@@ -87,8 +87,8 @@ describe('ObjectField', function() {
             });
 
             it('should return an id by default', function(done) {
-                field.getValue().should.equal(model.id);
                 done();
+                field.getValue().should.equal(model.id);
             });
 
             it('should be able to return full object', function(done) {
