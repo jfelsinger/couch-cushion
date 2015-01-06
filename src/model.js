@@ -10,12 +10,12 @@ function Model(options) {
     this._computed = {};
     this._methods = {};
 
-    if (options && typeof(options) !== 'object')
-        throw new Error('Attempted to construct model with invalid options parameter');
-    else
-        this.options = options;
 
     if (options) {
+        if (typeof(options) !== 'object')
+            throw new Error('Attempted to construct model with invalid options parameter');
+
+        this.options = options;
 
         if (options.bucket) this.options.bucket = options.bucket;
 
@@ -174,11 +174,19 @@ Model.prototype.save = function(cb, bucket) {
     if (this._fields.updated)
         this._fields.updated.set(new Date());
 
+    var saves = [];
     for (var key in this._fields)
         if (this._fields[key].save && typeof(this._fields[key].save) === 'function')
-            this._fields[key].save();
+            saves.push(this._fields[key].save.bind(this));
 
-    bucket.upsert(this._fields.id.get(), this.getValue(), cb);
+    require('async').each(saves, function(save, cb) {
+        console.log('save');
+        save(cb, bucket);
+    }, (function (err) {
+        console.log('save final');
+        bucket.upsert(this._fields.id.get(), this.getValue(), cb);
+    }).bind(this));
+
     return this;
 };
 

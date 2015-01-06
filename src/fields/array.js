@@ -48,12 +48,19 @@ FieldArray.prototype.set = function set(value) {
 /**
  * Try and save all of the elements of the array
  */
-FieldArray.prototype.save = function saveArray() {
+FieldArray.prototype.save = function saveArray(cb, bucket) {
+    var saves = [];
     for (var key in this._value) {
         var value = this._value[key];
         if (value.save && typeof(value.save) === 'function')
-            value.save();
+            saves.push(value.save.bind(value));
     }
+
+    require('async').each(saves, function(save, cb) {
+        save(cb, bucket);
+    }, function (err) {
+        if (cb && typeof(cb) === 'function') cb();
+    });
 
     return this;
 };
@@ -69,7 +76,7 @@ FieldArray.prototype.getValue = function getValue(getAll) {
 
         if (typeof(value.getInline) === 'function')
             results[key] = value.getInline();
-        if (typeof(value.getValue) === 'function')
+        else if (typeof(value.getValue) === 'function')
             results[key] = (value.getValue(getAll));
         else
             results[key] = (value);

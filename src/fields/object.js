@@ -53,6 +53,8 @@ FieldObject.prototype.getValue = function(getAll) {
 FieldObject.prototype.save = function(cb, bucket) {
     if (this._isLoaded && this._value)
         this._value.save(cb, bucket);
+    else if (cb && typeof(cb) === 'function')
+        cb();
 
     return this;
 };
