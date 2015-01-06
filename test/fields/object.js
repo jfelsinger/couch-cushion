@@ -87,7 +87,6 @@ describe('ObjectField', function() {
             });
 
             it('should return an id by default', function(done) {
-                console.log('loaded: ',field._isLoaded);
                 field.getValue().should.equal(model.id);
                 done();
             });

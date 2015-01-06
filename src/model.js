@@ -180,10 +180,8 @@ Model.prototype.save = function(cb, bucket) {
             saves.push(this._fields[key].save.bind(this));
 
     require('async').each(saves, function(save, cb) {
-        console.log('save');
         save(cb, bucket);
     }, (function (err) {
-        console.log('save final');
         bucket.upsert(this._fields.id.get(), this.getValue(), cb);
     }).bind(this));
 

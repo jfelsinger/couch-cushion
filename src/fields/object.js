@@ -154,8 +154,6 @@ FieldObject.prototype.set = function setter(value, cb) {
 
             this.setModelType(value.type.capitalize());
             this._value = value;
-            console.log('                   +1 ');
-            return;
             this._isInitialized = true;
             this._isLoaded = true;
             if (cb && typeof(cb) === 'function') cb(null, this);
