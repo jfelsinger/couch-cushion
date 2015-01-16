@@ -258,9 +258,7 @@ function(name, reference, cb, bucket) {
     reference = new Ref(name);
 
     bucket.get(name, function(err, res) {
-        if (err) {
-            cb(err, reference, res);
-        }
+        if (err) return cb(err, reference, res);
 
         reference.set(getOneResult(res));
         
@@ -289,10 +287,7 @@ CouchCushion.prototype.get = function(id, cb, model, bucket) {
         Model = this.getModel(model);
 
     bucket.get(id, function(err, res) {
-        if (err) {
-            cb(err, null, res);
-            return;
-        }
+        if (err) return cb(err, null, res);
 
         if (!Model && res.value && res.value.type) {
             Model = self.getModel(res.value.type.capitalize(true));
