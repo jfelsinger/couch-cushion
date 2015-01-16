@@ -16,6 +16,7 @@ var fields = {
 var FIELDALIASES = {
   'Id':         'id',
 
+  'Bool':       'bool',
   'Boolean':    'bool',
   'boolean':    'bool',
 
