@@ -17,7 +17,7 @@ FieldEnum.prototype.constructor = FieldEnum;
 
 FieldEnum.prototype.set = function(value) {
     if (this.validate(value) === false)
-        throw new Error('Attempted to set invalid value in enumueration field');
+        throw new Error('Attempted to set invalid value `' + value + '` in enumueration field');
 
     if (this.options.choices[value] !== undefined)
         this._value = this.options.choices[value];
