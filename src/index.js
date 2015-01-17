@@ -1,6 +1,7 @@
 'use strict';
 
-var Couchbase = require('couchbase');
+var Couchbase = require('couchbase'),
+    async = require('async');
 
 /**
  * An ODM class for communicating with Couchbase
@@ -170,9 +171,26 @@ CouchCushion.prototype.save = function(docs, cb, bucket) {
     if (!Array.isArray(docs))
         docs = [docs];
 
+    // An UGH function
+    var request = function(doc) {
+        return function(cb) {
+            doc.save(cb, bucket);
+        };
+    };
+
+    // create a series of requests to save all of the supplied documents
+    var requests = [];
     for (var i = 0; i < docs.length; i++) {
-        docs[i].save(cb, bucket);
+        if (docs[i] && docs[i].save)
+            requests.push(request(docs[i]));
+        else
+            cb(new Error('invalid document supplied'));
     }
+
+    // Run through and try to asynchronously run all the save requests
+    async.each(requests, function(req, cb) {
+        req(cb);
+    }, cb);
 
     return this;
 };
