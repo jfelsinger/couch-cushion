@@ -59,7 +59,7 @@ FieldArray.prototype.save = function saveArray(cb, bucket) {
     require('async').each(saves, function(save, cb) {
         save(cb, bucket);
     }, function (err) {
-        if (cb && typeof(cb) === 'function') cb();
+        if (cb && typeof(cb) === 'function') cb(err);
     });
 
     return this;

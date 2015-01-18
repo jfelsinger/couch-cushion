@@ -5,6 +5,11 @@ var Fields = require('../src/fields');
 
 var should = require('should');
 
+//
+// TODO:
+// Add tests for inline type fields
+//
+
 describe('Model', function() {
 
     it('should construct', function(done) {

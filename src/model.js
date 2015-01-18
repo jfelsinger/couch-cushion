@@ -138,22 +138,29 @@ function(data, cb) {
     if (typeof(data) !== 'object' && typeof(data) !== 'function')
         throw new Error('Invalid parameter `data` given');
 
-    cb = cb || function(name, value) {
-        return function(err, obj, res) {
-            /*
-            console.log();
-            console.log('name: ' + name);
-            console.log('value: ', value);
-            console.log('---------------------------------');
+    cb = cb || function() { return true; };
 
-            console.log(err);
-            console.log(obj);
-            console.log(res);
-            */
+    // Just a bunch of potential logging stuff to replace the above
+    // if we so desired
+    //
+    // cb = cb || function(name, value) {
+    //     return true;
 
-            return true;
-        };
-    };
+    //     return function(err, obj, res) {
+    //         /*
+    //         console.log();
+    //         console.log('name: ' + name);
+    //         console.log('value: ', value);
+    //         console.log('---------------------------------');
+
+    //         console.log(err);
+    //         console.log(obj);
+    //         console.log(res);
+    //         */
+
+    //         return true;
+    //     };
+    // };
 
     for (var key in data)
         if (this._fields[key] && this._fields[key] !== undefined &&
@@ -182,6 +189,7 @@ Model.prototype.save = function(cb, bucket) {
     require('async').each(saves, function(save, cb) {
         save(cb, bucket);
     }, (function (err) {
+        if (err) cb(err);
         bucket.upsert(this._fields.id.get(), this.getValue(), cb);
     }).bind(this));
 

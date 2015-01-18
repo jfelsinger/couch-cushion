@@ -16,6 +16,7 @@ function FieldObject(options, value, _cushion) {
 
     this._isInitialized = false;
     this._isLoaded = false;
+    this._isInline = false;
     this._model = undefined;
 
     cushion = _cushion || require('couch-cushion');
@@ -23,6 +24,7 @@ function FieldObject(options, value, _cushion) {
     if (options) {
 
         if (options.modelType) this.setModelType(options.modelType);
+        if (options.inline) this._isInline = !!options.inline;
 
     }
 }
@@ -37,13 +39,22 @@ module.exports = FieldObject;
 /**
  * Returns either a full object, or just an id based on the value of getAll
  */
-FieldObject.prototype.getValue = function(getAll) {
+FieldObject.prototype.getValue = function(getAll, inline) {
     if (!this._isLoaded)
         return this._value;
 
-    return getAll ?
-        this._value.getValue(getAll) :
-        this._value.id;
+    // By default just supply an id as a value for the object
+    var result = this._value.id;
+
+    // Get the entire object if it is requests
+    if (getAll) 
+        result = this._value.getValue(getAll);
+
+    // Else, see about giving the value as an inline value
+    else if ((this._isInline || inline) && this._value.getInline)
+        result = this._value.getInline();
+
+    return result;
 };
 
 
@@ -93,10 +104,19 @@ FieldObject.prototype.get = function getter() {
     return this;
 };
 
+/**
+ * Load the full object from the db
+ */
 FieldObject.prototype.load = function load(cb, id) {
     if (!this._isLoaded) {
         var self = this;
-        id = id || this._value;
+
+        // Do your best to get a working id. You can do it!
+        //
+        // a. use a supplied id,
+        // b. else use the id of an inline-like object
+        // c. else just use the value (hopefully it's an id)
+        id = id || this._value && this._value.id || this._value;
 
         cushion.get(this._value, function(err, model, res) {
             if (err) { return cb(err, model, res); }
@@ -115,7 +135,6 @@ FieldObject.prototype.load = function load(cb, id) {
  * A cb can be used, and will be called when the initialization is complete
  */
 FieldObject.prototype.set = function setter(value, cb) {
-    var self = this;
     var err;
 
     // Why in the world do I have to do this? I don't have the slightest clue,
@@ -135,7 +154,7 @@ FieldObject.prototype.set = function setter(value, cb) {
             this._isInitialized = true;
             this._isLoaded = true;
 
-            if (cb && typeof(cb) === 'function') cb(null, this);
+            if (cb && typeof(cb) === 'function') cb(err, this);
 
         } else if (value && typeof(value) === 'object' && value.type) {
 
@@ -156,13 +175,19 @@ FieldObject.prototype.set = function setter(value, cb) {
             this._value = value;
             this._isInitialized = true;
             this._isLoaded = true;
-            if (cb && typeof(cb) === 'function') cb(null, this);
+            if (cb && typeof(cb) === 'function') cb(err, this);
+
+        } else if (value && typeof(value) === 'object' && value.id) {
+
+            // Assume that it's a type of inline object
+            this._value = value;
+            if (cb && typeof(cb) === 'function') cb(err, this);
 
         } else if (value && typeof(value) === 'string') {
             
             // Assume the value is an id, try to work from there
             this._value = value;
-            if (cb && typeof(cb) === 'function') cb(null, this);
+            if (cb && typeof(cb) === 'function') cb(err, this);
 
         } else {
             err = new Error('value can not be used to generate a new object on an un-initialized object field');
@@ -177,7 +202,7 @@ FieldObject.prototype.set = function setter(value, cb) {
             // It's an actual model, set it
             this._value = value;
             this._isLoaded = true;
-            if (cb && typeof(cb) === 'function') cb(null, this);
+            if (cb && typeof(cb) === 'function') cb(err, this);
 
         } else if (typeof(value) === 'object') {
 
@@ -185,13 +210,13 @@ FieldObject.prototype.set = function setter(value, cb) {
             this._value = new this._model();
             this._value.set(value);
             this._isLoaded = true;
-            if (cb && typeof(cb) === 'function') cb(null, this);
+            if (cb && typeof(cb) === 'function') cb(err, this);
 
         } else if (typeof(value) === 'string') {
             // It's an id
             this._value = value;
             this._isLoaded = false;
-            if (cb && typeof(cb) === 'function') cb(null, this);
+            if (cb && typeof(cb) === 'function') cb(err, this);
 
         } else {
             err = new Error('attempted to set invalid value on object field');

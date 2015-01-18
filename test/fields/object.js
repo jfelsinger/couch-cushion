@@ -4,6 +4,11 @@ var ObjectField = require('../../src/fields/object'),
     bucket = require('../../lib/mocks/bucket'),
     cushion = require('../..');
 
+//
+// TODO:
+// Add tests for inline type fields
+//
+
 describe('ObjectField', function() {
     cushion.options.bucket = bucket;
     if (!cushion._models.Test) {

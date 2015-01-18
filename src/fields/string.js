@@ -11,11 +11,17 @@ FieldString.prototype.constructor = FieldString;
 
 FieldString.prototype.set = function(value) {
     
-    // Make falsy values equal an empty string
-    if (!value) value = '';
+    // Try and convert any non-string types
+    if (typeof(value) !== 'string') {
+        // Convert falsy values to an empty string, but preserve numerics
+        if (!value && value !== 0) value = '';
+
+        // Convert values to a string type
+        value += '';
+    }
 
     // Convert value to string
-    this._value = value + '';
+    this._value = value;
 };
 
 module.exports = FieldString;

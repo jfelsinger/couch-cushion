@@ -3,6 +3,11 @@
 var ArrayField = require('../../src/fields/array');
 var should = require('should');
 
+//
+// TODO:
+// Add tests for inline type fields
+//
+
 describe('ArrayField', function() {
     var field;
     var test;

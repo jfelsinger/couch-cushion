@@ -59,11 +59,11 @@ describe('StringField', function() {
 
             value = null;
             field.set(value);
-            field.get().should.equal(value + '');
+            field.get().should.equal('');
 
             value = undefined;
             field.set(value);
-            field.get().should.equal(value + '');
+            field.get().should.equal('');
 
             value = {};
             field.set(value);
@@ -75,7 +75,7 @@ describe('StringField', function() {
 
             value = false;
             field.set(value);
-            field.get().should.equal(value + '');
+            field.get().should.equal('');
 
             value = 0;
             field.set(value);
