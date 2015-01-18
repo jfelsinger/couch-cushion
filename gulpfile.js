@@ -30,7 +30,7 @@ gulp.task('lint-tests', function() {
         .on('error', handle);
 });
 
-gulp.task('test', function() {
+gulp.task('test', ['lint'], function() {
     return gulp.src('test/**/*.js')
         .pipe(mocha({ reporter: 'list' }))
         .on('error', handle);
@@ -40,8 +40,6 @@ gulp.task('watch', ['test'], function() {
     // Linting tasks
     gulp.watch([
         'gulpfile.js',
-        'src/**/*.js',
-        'lib/**/*.js',
     ], ['lint']);
 
     // gulp.watch('test/**/*.js', ['lint-tests']);
