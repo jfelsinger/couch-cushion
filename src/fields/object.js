@@ -189,10 +189,18 @@ FieldObject.prototype.set = function setter(value, cb) {
             this._value = value;
             if (cb && typeof(cb) === 'function') cb(err, this);
 
+        } else if (!value) {
+
+            // Trying to set a falsey value, assume that it just isn't set
+            if (cb && typeof(cb) === 'function') cb(err, this);
+
         } else {
+
+            // Trying to set some type of invalid value
             err = new Error('value can not be used to generate a new object on an un-initialized object field');
             if (!cb || typeof(cb) !== 'function' || cb(err, this) != true)
                 throw err;
+
         }
 
     } else {
