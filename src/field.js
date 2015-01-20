@@ -18,6 +18,7 @@ function Field(options, value) {
                 'allowedOptions', 
                 'readonly',
                 'name',
+                'default',
             ])
         ._setOptions(options, {
                 readonly: false
@@ -26,7 +27,10 @@ function Field(options, value) {
     /** @access protected */
     this._value = undefined;
 
-    if (value !== undefined) this.set(value);
+    if (arguments.length > 1 && arguments[1])
+        this.set(arguments[1]);
+    else if (this.options.default)
+        this.set(this.options.default);
 }
 
 /**
