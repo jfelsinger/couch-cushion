@@ -7,7 +7,7 @@ function FieldArray() {
     this.allowOptions('isObject');
     Field.apply(this, arguments);
 
-
+    if (!this._value) this.set([]);
 }
 
 FieldArray.prototype = Object.create(Field.prototype);
