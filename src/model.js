@@ -24,7 +24,7 @@ function Model(options) {
     _initFields(this);
 
     if (this._fields.id)
-        this._fields.id.generate(this._fields.type.get());
+        this._fields.id.generate(this._fields.id._prefix || this._fields.type.get());
 }
 
 module.exports = Model;
