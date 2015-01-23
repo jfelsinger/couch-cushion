@@ -1,5 +1,7 @@
 'use strict';
 
+var debug = require('debug')('couch-cushion:fields:array');
+
 var Field = require('../field');
 
 
@@ -61,6 +63,8 @@ FieldArray.prototype.save = function saveArray(cb, bucket) {
     }, function (err) {
         if (cb && typeof(cb) === 'function') cb(err);
     });
+
+    debug('saving field: array', this.getValue());
 
     return this;
 };

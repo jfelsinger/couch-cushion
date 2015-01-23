@@ -2,6 +2,7 @@
 /* jslint latedef:false */
 
 var debug = require('debug')('couch-cushion:model');
+var debugSave = require('debug')('couch-cushion:model:save');
 
 /**
  * @class
@@ -197,8 +198,6 @@ Model.prototype.save = function(cb, bucket) {
     bucket = bucket || this.options.bucket;
     var id = this._fields.id.get();
 
-    debug('saving model: ' + id);
-
     // Update the updated date
     if (this._fields.updated)
         this._fields.updated.set(new Date());
@@ -211,7 +210,9 @@ Model.prototype.save = function(cb, bucket) {
     require('async').each(saves, function(save, cb) {
         save(cb, bucket);
     }, (function (err) {
-        if (err) cb(err);
+        if (err) return cb(err);
+
+        debugSave('saving model: ' + id + ' \r\n', this.getValue());
         bucket.upsert(id, this.getValue(), cb);
     }).bind(this));
 
