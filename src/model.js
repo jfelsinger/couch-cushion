@@ -1,6 +1,8 @@
 'use strict';
 /* jslint latedef:false */
 
+var debug = require('debug')('couch-cushion:model');
+
 /**
  * @class
  */
@@ -10,6 +12,7 @@ function Model(options) {
     this._computed = {};
     this._methods = {};
 
+    debug('constructing');
 
     if (options) {
         if (typeof(options) !== 'object')
@@ -53,6 +56,8 @@ Model.prototype.schema = {
 function _initFields(model) {
     var schema = model.schema;
 
+    debug('initializing model schema...');
+
     if (schema instanceof Schema || schema.schema) {
         setSchema(schema.schema, model.cushion);
 
@@ -62,9 +67,11 @@ function _initFields(model) {
         if (schema.methods)
             setMethods(schema.methods);
     } else {
-        // Se assume that it is a basic object schema
+        // We assume that it is a basic object schema
         setSchema(schema, model.cushion);
     }
+
+    debug('model schema initialized');
 
     function get(name) {
         return function getter() {
@@ -79,6 +86,7 @@ function _initFields(model) {
     }
 
     function setMethods(methods) {
+        debug('initializing schema methods');
         for (var methodName in methods) {
             var method = methods[methodName];
             model._methods[methodName] = method;
@@ -90,6 +98,7 @@ function _initFields(model) {
     }
 
     function setComputed(computedProperties) {
+        debug('initializing schema computed properties');
         for (var name in computedProperties) {
             var computed = computedProperties[name];
             model._computed[name] = computed;
@@ -110,6 +119,7 @@ function _initFields(model) {
     }
 
     function setSchema(schema, cushion) {
+        debug('initializing schema fields');
         for (var name in schema) {
             var field = Fields.buildScheme(schema[name], name, cushion);
 
@@ -138,7 +148,12 @@ function(data, cb) {
     if (typeof(data) !== 'object' && typeof(data) !== 'function')
         throw new Error('Invalid parameter `data` given');
 
-    cb = cb || function() { return true; };
+    debug('setting model data...');
+
+    cb = cb || function() { 
+        debug('model data set');
+        return true; 
+    };
 
     // Just a bunch of potential logging stuff to replace the above
     // if we so desired
@@ -173,9 +188,16 @@ function(data, cb) {
 
 /**
  * Save's the model to the bucket
+ *
+ * @param {*} cb
+ * @param {*} [bucket]
+ * @returns {*}
  */
 Model.prototype.save = function(cb, bucket) {
     bucket = bucket || this.options.bucket;
+    var id = this._fields.id.get();
+
+    debug('saving model: ' + id);
 
     // Update the updated date
     if (this._fields.updated)
@@ -190,7 +212,7 @@ Model.prototype.save = function(cb, bucket) {
         save(cb, bucket);
     }, (function (err) {
         if (err) cb(err);
-        bucket.upsert(this._fields.id.get(), this.getValue(), cb);
+        bucket.upsert(id, this.getValue(), cb);
     }).bind(this));
 
     return this;
@@ -200,7 +222,9 @@ Model.prototype.save = function(cb, bucket) {
  * Get a value representative of the entire model
  *
  * @param {boolean} getAll - whether or not to return full objects
- * @param {boolean{ asJson - whether or not to return a json string
+ * @param {boolean} asJson - whether or not to return a json string
+ * @param {boolean} withComputed - whether or not to include computed props
+ * @param {boolean} withMethods - whether or not to include schema methods
  * @returns {*}
  */
 Model.prototype.getValue = function(getAll, asJson, withComputed, withMethods) {

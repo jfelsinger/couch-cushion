@@ -1,5 +1,7 @@
 'use strict';
 
+var debug = require('debug')('couch-cushion');
+
 var Couchbase = require('couchbase'),
     async = require('async');
 
@@ -60,12 +62,14 @@ CouchCushion.prototype.connect = function connect(options) {
 CouchCushion.prototype.getOption =
 CouchCushion.prototype.setOption = function(option, value) {
     if (arguments.length === 2) {
+        debug('setting option: ' + option + ' = ' + value);
 
         this.options[option] = value;
 
         return this;
 
     } else {
+        debug('getting option: ' + option);
 
         return this.options[option];
 
@@ -86,6 +90,8 @@ function buildReference(name, schema, override) {
     // If the schema was supplied, that means we /should/ be adding a new model
     // to the list.
     if (schema) {
+        debug('creating reference model: ' + name);
+
         if (this._refmodels[name] && !override)
             throw new Error('attempted to create already existing reference type: `'+name+'`');
 
@@ -111,6 +117,7 @@ function buildReference(name, schema, override) {
     if (!this._refmodels[name])
         throw new Error('attempted to get non-existent model: `'+name+'`');
 
+    debug('returning reference model: ' + name);
     return this._refmodels[name];
 };
 
@@ -128,6 +135,8 @@ function buildModel(name, schema, override) {
     // If the schema was supplied, that means we /should/ be adding a new model
     // to the list.
     if (schema) {
+        debug('creating model: ' + name);
+
         if (this._models[name] && !override)
             throw new Error('attempted to create already existing model: `'+name+'`');
 
@@ -153,6 +162,7 @@ function buildModel(name, schema, override) {
     if (!this._models[name])
         throw new Error('attempted to get non-existent model: `'+name+'`');
 
+    debug('returning model: ' + name);
     return this._models[name];
 };
 
@@ -171,26 +181,26 @@ CouchCushion.prototype.save = function(docs, cb, bucket) {
     if (!Array.isArray(docs))
         docs = [docs];
 
-    // An UGH function
-    var request = function(doc) {
-        return function(cb) {
-            doc.save(cb, bucket);
-        };
-    };
-
     // create a series of requests to save all of the supplied documents
     var requests = [];
-    for (var i = 0; i < docs.length; i++) {
-        if (docs[i] && docs[i].save)
-            requests.push(request(docs[i]));
+    docs.forEach(function(doc) {
+        if (doc && doc.save)
+            requests.push(function(cb) {
+                debug('saving:       ' + doc && doc.id);
+                doc.save(cb, bucket);
+            });
         else
             cb(new Error('invalid document supplied'));
-    }
+    });
 
     // Run through and try to asynchronously run all the save requests
     async.each(requests, function(req, cb) {
         req(cb);
-    }, cb);
+    }, function(err) {
+        if (err) { debug('saving failed'); }
+        else { debug('save complete'); }
+        cb(err);
+    });
 
     return this;
 };
@@ -275,11 +285,13 @@ function(name, reference, cb, bucket) {
     // If it has a type, use that, else assume that it is a string
     reference = new Ref(name);
 
+    debug('getting reference:  ' + name);
     bucket.get(name, function(err, res) {
         if (err) return cb(err, reference, res);
 
         reference.set(getOneResult(res));
         
+        debug('received reference: ' + name);
         cb(err, reference, res);
     });
 
@@ -304,6 +316,7 @@ CouchCushion.prototype.get = function(id, cb, model, bucket) {
     if (model)
         Model = this.getModel(model);
 
+    debug('getting doc:  ' + id);
     bucket.get(id, function(err, res) {
         if (err) return cb(err, null, res);
 
@@ -318,6 +331,7 @@ CouchCushion.prototype.get = function(id, cb, model, bucket) {
             err = 'could not get model';
         }
 
+        debug('received doc: ' + id);
         cb(err, model, res);
     });
 

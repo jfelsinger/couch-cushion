@@ -1,5 +1,6 @@
 'use strict';
 
+var debug = require('debug')('couch-cushion:fields');
 
 var fields = {
     id:         require('./id'),
@@ -94,9 +95,10 @@ module.exports.buildScheme = function buildScheme(scheme, name, cushion) {
     if (name && !scheme.name)
         scheme.name = name;
 
+    debug('building field: ' + name + ', ' + scheme.field);
+
     var value = scheme.value;
     var field = this.getField(scheme.field);
-
     scheme = new field(scheme, value, cushion);
 
     return scheme;

@@ -1,5 +1,7 @@
 'use strict';
 
+var debug = require('debug')('couch-cushion:reference');
+
 var Model = require('./model');
 
 /**
@@ -9,6 +11,8 @@ function Reference(name, options) {
     Model.call(this, options);
 
     this.name = name;
+
+    debug('constructed ref: ' + name);
 }
 
 Reference.prototype = Object.create(Model.prototype);
@@ -24,7 +28,10 @@ Reference.prototype.schema = {};
 
 Reference.prototype.save = 
 function(cb, bucket) {
+    var name = this.name;
     bucket = bucket || this.options.bucket;
+
+    debug('saving ref:   ' + name);
 
     // Update the updated date
     if (this._fields.updated)
@@ -34,6 +41,6 @@ function(cb, bucket) {
         if (this._fields[key].save && typeof(this._fields[key].save) === 'function')
             this._fields[key].save();
 
-    bucket.upsert(this.name, this.getValue(), cb);
+    bucket.upsert(name, this.getValue(), cb);
     return this;
 };

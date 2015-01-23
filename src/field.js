@@ -1,6 +1,5 @@
 'use strict';
 
-
 /**
  * Represents a field on a model/document
  *
@@ -8,7 +7,7 @@
  * @param {*} value
  * @class
  */
-function Field(options, value) {
+function Field(options) {
 
     if (!this.options) this.options = {};
 
