@@ -191,8 +191,6 @@ describe('ObjectField', function() {
         });
 
         it('should throw when trying to set an invalid value', function(done) {
-            field.set.bind(field, undefined).should.throw();
-            field.set.bind(field, null).should.throw();
             field.set.bind(field, 123.45).should.throw();
 
             done()
