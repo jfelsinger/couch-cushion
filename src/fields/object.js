@@ -137,11 +137,6 @@ FieldObject.prototype.load = function load(cb, id) {
 FieldObject.prototype.set = function setter(value, cb) {
     var err;
 
-    // Why in the world do I have to do this? I don't have the slightest clue,
-    // but it must be done... for now.
-    // cushion = require('couch-cushion');
-    // Model = require('../model');
-
     if (!this._isInitialized) {
 
         if (value && typeof(value) === 'function') {
@@ -236,3 +231,10 @@ FieldObject.prototype.set = function setter(value, cb) {
 
     return this;
 };
+
+
+// Create a property for easier dealing with the array
+Object.defineProperty(FieldObject.prototype, '_', {
+    get: function() { return this._value; },
+    set: FieldObject.prototype.set
+});
