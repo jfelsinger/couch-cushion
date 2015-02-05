@@ -479,7 +479,7 @@ CouchCushion.prototype.oneFromQuery = function(model, cb, query, bucket) {
 /**
  * Build a view query
  */
-function buildViewQuery(view, key, doc) {
+function buildViewQuery(view, key, doc, isMultiKeyQuery) {
     if (!doc) {
         // Get the document name
     }
@@ -487,7 +487,7 @@ function buildViewQuery(view, key, doc) {
     var query = Couchbase.ViewQuery.from(doc, view);
 
     if (key) {
-        if (Array.isArray(key))
+        if (isMultiKeyQuery && Array.isArray(key))
             query = query.keys(key);
 
         else if (key.id)
