@@ -486,7 +486,7 @@ function buildViewQuery(view, key, doc, isMultiKeyQuery) {
 
     var query = Couchbase.ViewQuery.from(doc, view);
 
-    if (false && key) {
+    if (key) {
         if (isMultiKeyQuery && Array.isArray(key))
             query = query.keys(key);
 
