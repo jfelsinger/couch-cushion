@@ -486,7 +486,7 @@ function buildViewQuery(view, key, doc, isMultiKeyQuery) {
 
     var query = Couchbase.ViewQuery.from(doc, view);
 
-    if (key) {
+    if (false && key) {
         if (isMultiKeyQuery && Array.isArray(key))
             query = query.keys(key);
 
@@ -514,8 +514,8 @@ function buildViewQuery(view, key, doc, isMultiKeyQuery) {
  * @param {*} bucket
  * @returns {CouchCushion}
  */
-CouchCushion.prototype.fromView = function(model, cb, view, key, doc, bucket) {
-    var query = buildViewQuery(view, key, doc);
+CouchCushion.prototype.fromView = function(model, cb, view, key, doc, bucket, isMultiKey) {
+    var query = buildViewQuery(view, key, doc, isMultiKey);
     return this.fromQuery(model, cb, query, bucket);
 };
 
@@ -530,7 +530,7 @@ CouchCushion.prototype.fromView = function(model, cb, view, key, doc, bucket) {
  * @param {*} bucket
  * @returns {CouchCushion}
  */
-CouchCushion.prototype.oneFromView = function(model, cb, view, key, doc, bucket) {
-    var query = buildViewQuery(view, key, doc);
+CouchCushion.prototype.oneFromView = function(model, cb, view, key, doc, bucket, isMultiKey) {
+    var query = buildViewQuery(view, key, doc, isMultiKey);
     return this.oneFromQuery(model, cb, query, bucket);
 };
