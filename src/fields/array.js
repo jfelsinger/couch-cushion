@@ -54,7 +54,7 @@ FieldArray.prototype.save = function saveArray(cb, bucket) {
     var saves = [];
     for (var key in this._value) {
         var value = this._value[key];
-        if (value.save && typeof(value.save) === 'function')
+        if (value && value.save && typeof(value.save) === 'function')
             saves.push(value.save.bind(value));
     }
 
@@ -78,9 +78,9 @@ FieldArray.prototype.getValue = function getValue(getAll) {
     for (var key in this._value) {
         var value = this._value[key];
 
-        if (typeof(value.getInline) === 'function')
+        if (value && typeof(value.getInline) === 'function')
             results[key] = value.getInline();
-        else if (typeof(value.getValue) === 'function')
+        else if (value && typeof(value.getValue) === 'function')
             results[key] = (value.getValue(getAll));
         else
             results[key] = (value);
