@@ -317,25 +317,70 @@ CouchCushion.prototype.get = function(id, cb, model, bucket) {
         Model = this.getModel(model);
 
     debug('getting doc:  ' + id);
-    bucket.get(id, function(err, res) {
-        if (err) return cb(err, null, res);
+    try {
+        bucket.get(id, function(err, res) {
+            if (err) return cb(err, null, res);
 
-        if (!Model && res.value && res.value.type) {
-            Model = self.getModel(res.value.type.capitalize(true));
-        }
+            if (!Model && res.value && res.value.type) {
+                Model = self.getModel(res.value.type.capitalize(true));
+            }
 
-        if (Model) {
-            model = new Model();
-            model.set(res.value);
-        } else {
-            err = 'could not get model';
-        }
+            if (Model) {
+                model = new Model();
+                model.set(res.value);
+            } else {
+                err = 'could not get model';
+            }
 
-        debug('received doc: ' + id);
-        cb(err, model, res);
-    });
+            debug('received doc: ' + id);
+            cb(err, model, res);
+        });
+    }
+    catch (e) {
+        cb(e);
+    }
 
     return this;
+};
+
+CouchCushion.prototype.getFromElasticsearch = function(es, cb, model, bucket) {
+    bucket = bucket || this.options.bucket;
+    var Model;
+
+    if (model)
+        Model = this.getModel(model);
+
+    if (!(es && es.test))
+        return cb(new Error('Malformed Elasticsearch Response'));
+
+    var hits = es.hits;
+
+    var docs = [];
+    var requests = hits.map(function(val) {
+        return function(cb) {
+            var err;
+            var doc = val._source.doc;
+
+            if (!Model && doc && doc.type) {
+                Model = self.getModel(doc.type.capitalize(true));
+            }
+
+            if (Model) {
+                model = new Model();
+                model.set(doc);
+            } else {
+                err = 'Could not get model: ' + (val && val.id) || val;
+            }
+
+            debug('received doc: ' + (val && val.id) || val);
+            docs.push(model);
+            cb(err);
+        };
+    });
+
+    async.parallel(requests, function(err) {
+        cb(err, docs, es);
+    });
 };
 
 /**

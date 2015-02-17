@@ -196,6 +196,9 @@ function(data, cb) {
  */
 Model.prototype.save = function(cb, bucket) {
     bucket = bucket || this.options.bucket;
+    if (!bucket)
+        return cb(new Error('No available buckets'));
+
     var id = this._fields.id.get();
 
     // Update the updated date
@@ -213,7 +216,13 @@ Model.prototype.save = function(cb, bucket) {
         if (err) return cb(err);
 
         debugSave('saving model: ' + id + ' \r\n', this.getValue());
+
+        if (!bucket) {
+            return cb(new Error('Bucket has gone missing'));
+        }
+
         bucket.upsert(id, this.getValue(), cb);
+
     }).bind(this));
 
     return this;
