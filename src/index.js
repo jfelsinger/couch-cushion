@@ -28,6 +28,9 @@ var Model = require('./model'),
 // Expose the schema class
 CouchCushion.prototype.Schema = Schema; 
 
+// Expose the same Couchbase object that we use
+CouchCushion.prototype.Cb = Couchbase; 
+
 
 /**
  * Connect to a Couchbase cluster and specified bucket
