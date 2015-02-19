@@ -428,7 +428,6 @@ CouchCushion.prototype.getMany = function(model, cb, search, key, doc, bucket) {
         var query = Couchbase.SpatialQuery.from(search.ddoc, search.name).bbox(search.bbox);
         return this.fromQuery(model, cb, query, bucket);
     } else {
-		debug('calling fromView');
         return this.fromView(model, cb, search, key, doc, bucket);
 
     }
@@ -456,9 +455,7 @@ CouchCushion.prototype.fromQuery = function(model, cb, query, bucket) {
     }
 
     bucket.query(query, function(err, res) {
-        debug('before err');
         if (err) return cb(err, null, res);
-        debug('after err');
         var models = [];
 
         if (res) {
