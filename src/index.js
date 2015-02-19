@@ -419,13 +419,16 @@ CouchCushion.prototype.getOne = function(model, cb, search, key, doc, bucket) {
  * @returns {CouchCushion}
  */
 CouchCushion.prototype.getMany = function(model, cb, search, key, doc, bucket) {
+    
     if (search instanceof Couchbase.ViewQuery || 
        (search.keys && search.key && search.from)) {
-
+		
         return this.fromQuery(model, cb, search, bucket);
-
+    } else if(typeof search === 'object' && search.bbox) {
+        var query = Couchbase.SpatialQuery.from(search.ddoc, search.name).bbox(search.bbox);
+        return this.fromQuery(model, cb, query, bucket);
     } else {
-
+		debug('calling fromView');
         return this.fromView(model, cb, search, key, doc, bucket);
 
     }
@@ -453,16 +456,23 @@ CouchCushion.prototype.fromQuery = function(model, cb, query, bucket) {
     }
 
     bucket.query(query, function(err, res) {
+        debug('before err');
         if (err) return cb(err, null, res);
+        debug('after err');
         var models = [];
 
         if (res) {
+            
             var values = getResults(res);
 
             for (var i = 0; i < values.length; i++) {
-
                 var resultModel = new RequestModel({ bucket: bucket });
-                resultModel.set(values[i].value);
+                
+               	var modelValue = values[i].value;
+                if(typeof modelValue == "string")
+                    modelValue = JSON.parse(modelValue);
+                
+                resultModel.set(modelValue);
                 models.push(resultModel);
             }
         } else {
