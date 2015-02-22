@@ -3,8 +3,10 @@
 
 ### Installation
 
+This isn't currently up on npm yet, so you'll have to install from the git repo.
+
 ```
-npm install --save git+ssh://git@bitbucket.org:iconiqgmbh/couch-cushion-odm.git
+npm install --save git+ssh://git@github.com:jfelsinger/couch-cushion.git
 ```
 
 ---
