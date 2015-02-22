@@ -1,5 +1,14 @@
 'use strict';
 
+//
+// TODO:
+// Look into handling "reference" documents differently... or maybe not so
+// differently.
+//
+// Rethink ya functions, and they way they are interfaced. A lot of the args and
+// way they are done are kind of cumbersome.
+//
+
 var debug = require('debug')('couch-cushion');
 
 var Couchbase = require('couchbase'),
@@ -29,7 +38,8 @@ var Model = require('./model'),
 CouchCushion.prototype.Schema = Schema; 
 
 // Expose the same Couchbase object that we use
-CouchCushion.prototype.Cb = Couchbase; 
+CouchCushion.prototype.Cb = 
+CouchCushion.prototype.Couchbase = Couchbase; 
 
 
 /**
@@ -346,45 +356,45 @@ CouchCushion.prototype.get = function(id, cb, model, bucket) {
     return this;
 };
 
-CouchCushion.prototype.getFromElasticsearch = function(es, cb, model, bucket) {
-    bucket = bucket || this.options.bucket;
-    var Model;
-
-    if (model)
-        Model = this.getModel(model);
-
-    if (!(es && es.test))
-        return cb(new Error('Malformed Elasticsearch Response'));
-
-    var hits = es.hits;
-
-    var docs = [];
-    var requests = hits.map(function(val) {
-        return function(cb) {
-            var err;
-            var doc = val._source.doc;
-
-            if (!Model && doc && doc.type) {
-                Model = self.getModel(doc.type.capitalize(true));
-            }
-
-            if (Model) {
-                model = new Model();
-                model.set(doc);
-            } else {
-                err = 'Could not get model: ' + (val && val.id) || val;
-            }
-
-            debug('received doc: ' + (val && val.id) || val);
-            docs.push(model);
-            cb(err);
-        };
-    });
-
-    async.parallel(requests, function(err) {
-        cb(err, docs, es);
-    });
-};
+// CouchCushion.prototype.getFromElasticsearch = function(es, cb, model, bucket) {
+//     bucket = bucket || this.options.bucket;
+//     var Model;
+// 
+//     if (model)
+//         Model = this.getModel(model);
+// 
+//     if (!(es && es.test))
+//         return cb(new Error('Malformed Elasticsearch Response'));
+// 
+//     var hits = es.hits;
+// 
+//     var docs = [];
+//     var requests = hits.map(function(val) {
+//         return function(cb) {
+//             var err;
+//             var doc = val._source.doc;
+// 
+//             if (!Model && doc && doc.type) {
+//                 Model = this.getModel(doc.type.capitalize(true));
+//             }
+// 
+//             if (Model) {
+//                 model = new Model();
+//                 model.set(doc);
+//             } else {
+//                 err = 'Could not get model: ' + (val && val.id) || val;
+//             }
+// 
+//             debug('received doc: ' + (val && val.id) || val);
+//             docs.push(model);
+//             cb(err);
+//         };
+//     }.bind(this));
+// 
+//     async.parallel(requests, function(err) {
+//         cb(err, docs, es);
+//     });
+// };
 
 /**
  * Get a single document from a search
@@ -469,7 +479,7 @@ CouchCushion.prototype.fromQuery = function(model, cb, query, bucket) {
                 var resultModel = new RequestModel({ bucket: bucket });
                 
                	var modelValue = values[i].value;
-                if(typeof modelValue == "string")
+                if (typeof(modelValue) === 'string')
                     modelValue = JSON.parse(modelValue);
                 
                 resultModel.set(modelValue);
