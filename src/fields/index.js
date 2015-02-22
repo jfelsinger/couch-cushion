@@ -10,7 +10,7 @@ var fields = {
     constant:   require('./constant'),
     date:       require('./date'),
     enum:       require('./enum'),
-    array:      require('./array'),
+    model:      require('./model'),
     object:     require('./object'),
 };
 
@@ -37,11 +37,12 @@ var FIELDALIASES = {
   'Enumerable': 'enum',
   'enumerable': 'enum',
 
-  'Array':      'array',
-
   'Object':     'object',
-  'Model':      'object',
-  'model':      'object',
+  'Array':      'object',
+  'array':      'object',
+
+  'Model':      'model',
+  'model':      'model',
 };
 
 module.exports.fields = fields;
