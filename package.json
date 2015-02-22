@@ -1,6 +1,6 @@
 {
   "name": "couch-cushion",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@bitbucket.org:iconiqgmbh/couch-cushion-odm.git"
+    "url": "git@github.org:jfelsinger/couch-cushion.git"
   },
   "author": "",
   "devDependencies": {
