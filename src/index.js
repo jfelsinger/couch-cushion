@@ -366,7 +366,7 @@ CouchCushion.prototype.get = function(id, cb, model, bucket) {
 //             var doc = val._source.doc;
 //
 //             if (!Model && doc && doc.type) {
-//                 Model = self.getModel(doc.type.capitalize(true));
+//                 Model = this.getModel(doc.type.capitalize(true));
 //             }
 //
 //             if (Model) {
@@ -380,7 +380,7 @@ CouchCushion.prototype.get = function(id, cb, model, bucket) {
 //             docs.push(model);
 //             cb(err);
 //         };
-//     });
+//     }.bind(this));
 //
 //     async.parallel(requests, function(err) {
 //         cb(err, docs, es);
@@ -470,7 +470,7 @@ CouchCushion.prototype.fromQuery = function(model, cb, query, bucket) {
                 var resultModel = new RequestModel({ bucket: bucket });
 
                	var modelValue = values[i].value;
-                if(typeof modelValue == "string")
+                if (typeof modelValue == "string")
                     modelValue = JSON.parse(modelValue);
 
                 resultModel.set(modelValue);

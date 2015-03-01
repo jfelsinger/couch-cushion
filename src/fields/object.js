@@ -74,7 +74,7 @@ FieldObject.prototype.save = function saveObject(cb, bucket) {
  * Walk through an object or array and get a value representing it
  */
 function walkValue(object, isArray, getAll) {
-    var results = this.options.isArray ?  [] : {} ;
+    var results = isArray ?  [] : {} ;
 
     for (var key in object) {
         var value = object[key];

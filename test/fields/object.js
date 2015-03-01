@@ -73,12 +73,12 @@ describe('ObjectField', function() {
             done();
         });
 
-        it('should set `isObject` value', function(done) {
+        it('should set `isArray` value', function(done) {
             field.set(obj);
-            field.options.isObject.should.be.true;
+            field.options.isArray.should.be.false;
 
             field.set(arr);
-            field.options.isObject.should.be.false;
+            field.options.isArray.should.be.true;
 
             done();
         });
@@ -92,7 +92,6 @@ describe('ObjectField', function() {
 
         it('should return an empty object by default', function(done) {
             field.getValue().should.match({});
-            field.getValue().length.should.be.exactly(0);
             done();
         });
 
