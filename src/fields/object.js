@@ -1,240 +1,99 @@
 'use strict';
 
-require('../../lib/capitalize');
+var debug = require('debug')('couch-cushion:fields:object');
 
-var Field = require('../field'),
-    Model = require('../model'),
-    cushion;
+var Field = require('../field');
 
-/**
- * Represents an model or sub-model on a document
- *
- * @class
- */
-function FieldObject(options, value, _cushion) {
+
+function FieldObject() {
+    this.allowOptions('isArray');
     Field.apply(this, arguments);
 
-    this._isInitialized = false;
-    this._isLoaded = false;
-    this._isInline = false;
-    this._model = undefined;
-
-    cushion = _cushion || require('couch-cushion');
-
-    if (options) {
-
-        if (options.modelType) this.setModelType(options.modelType);
-        if (options.inline) this._isInline = !!options.inline;
-
-    }
+    if (!this._value) this.set([]);
 }
 
 FieldObject.prototype = Object.create(Field.prototype);
 FieldObject.prototype.constructor = FieldObject;
 
-module.exports = FieldObject;
-
-
-
 /**
- * Returns either a full object, or just an id based on the value of getAll
+ * Returns the actual value so we can manipulate it directly
  */
-FieldObject.prototype.getValue = function(getAll, inline) {
-    if (!this._isLoaded)
-        return this._value;
-
-    // By default just supply an id as a value for the object
-    var result = this._value.id;
-
-    // Get the entire object if it is requests
-    if (getAll) 
-        result = this._value.getValue(getAll);
-
-    // Else, see about giving the value as an inline value
-    else if ((this._isInline || inline) && this._value.getInline)
-        result = this._value.getInline();
-
-    return result;
-};
-
-
-/**
- * Save the represented model
- */
-FieldObject.prototype.save = function(cb, bucket) {
-    if (this._isLoaded && this._value)
-        this._value.save(cb, bucket);
-    else if (cb && typeof(cb) === 'function')
-        cb();
-
-    return this;
-};
-
-
-/**
- * Get the model type that is currently being represented
- */
-FieldObject.prototype.getModelType = function() {
-    return cushion.getModel(this._model);
+FieldObject.prototype.object =
+FieldObject.prototype.getObject =
+function getObject() {
+    return this._value;
 };
 
 /**
- * Try to set the type of model the field represents, if it hasn't already been
- * set
+ * Returns this, so that we can have access to all of our functions and such
  */
-FieldObject.prototype.setModelType = function(value) {
-    if (this._isInitialized)
-        throw new Error('attempted to set model type on already initialized object field');
-    if (this._model)
-        throw new Error('attempted to change model type on object field');
-
-    var RequestModel = cushion.getModel(value);
-
-    if (!RequestModel)
-        throw new Error('model type not found');
-
-    this._model = RequestModel;
-    this._isInitialized = true;
-
-    return this;
-};
-
-
-FieldObject.prototype.get = function getter() {
+FieldObject.prototype.get = function get() {
     return this;
 };
 
 /**
- * Load the full object from the db
+ * Sets the value, updates any extra properties
  */
-FieldObject.prototype.load = function load(cb, id) {
-    if (!this._isLoaded) {
-        var self = this;
+FieldObject.prototype.set = function set(value) {
+    if (!value || typeof(value) !== 'object')
+        throw new Error('attempted to set a non-object-like value on object field');
 
-        // Do your best to get a working id. You can do it!
-        //
-        // a. use a supplied id,
-        // b. else use the id of an inline-like object
-        // c. else just use the value (hopefully it's an id)
-        id = id || this._value && this._value.id || this._value;
+    if (Array.isArray(value))
+        this.options.isArray = true;
+    else
+        this.options.isArray = false;
 
-        cushion.get(this._value, function(err, model, res) {
-            if (err) { return cb(err, model, res); }
+    this._value = value;
+};
 
-            self.set(model, cb);
 
-        }, this._model, this.options.bucket);
+/**
+ * Try and save all of the elements of the object
+ */
+FieldObject.prototype.save = function saveObject(cb, bucket) {
+    var saves = [];
+    for (var key in this._value) {
+        var value = this._value[key];
+        if (value && value.save && typeof(value.save) === 'function')
+            saves.push(value.save.bind(value));
     }
 
+    require('async').each(saves, function(save, cb) {
+        save(cb, bucket);
+    }, function (err) {
+        if (cb && typeof(cb) === 'function') cb(err);
+    });
+
+    debug('saving field: object', this.getValue());
+
     return this;
 };
 
-/**
- * Try and set the field, by evaluating the type of value that is given
- *
- * A cb can be used, and will be called when the initialization is complete
- */
-FieldObject.prototype.set = function setter(value, cb) {
-    var err;
 
-    if (!this._isInitialized) {
+FieldObject.prototype.getValue = function getValue(getAll) {
+    var results = this.options.isArray ?
+        [] :
+        {} ;
 
-        if (value && typeof(value) === 'function') {
-            // assume that it's an uninitizlied model
+    for (var key in this._value) {
+        var value = this._value[key];
 
-            this.setModelType(value);
-            /* jslint -W055 */
-            this._value = new value();
-            /* jslint +W055 */
-            this._isInitialized = true;
-            this._isLoaded = true;
-
-            if (cb && typeof(cb) === 'function') cb(err, this);
-
-        } else if (value && typeof(value) === 'object' && value.type) {
-
-            if (!(value instanceof Model)) {
-                // It's an object full of values to be set, get a model from it
-
-                var ResultModel = cushion.getModel(value.type.capitalize());
-                var model = new ResultModel();
-                model.set(value);
-
-                value = model;
-            }
-
-            // else:
-            // an already initialized model is ready to be set
-
-            this.setModelType(value.type.capitalize());
-            this._value = value;
-            this._isInitialized = true;
-            this._isLoaded = true;
-            if (cb && typeof(cb) === 'function') cb(err, this);
-
-        } else if (value && typeof(value) === 'object' && value.id) {
-
-            // Assume that it's a type of inline object
-            this._value = value;
-            if (cb && typeof(cb) === 'function') cb(err, this);
-
-        } else if (value && typeof(value) === 'string') {
-            
-            // Assume the value is an id, try to work from there
-            this._value = value;
-            if (cb && typeof(cb) === 'function') cb(err, this);
-
-        } else if (!value) {
-
-            // Trying to set a falsey value, assume that it just isn't set
-            if (cb && typeof(cb) === 'function') cb(err, this);
-
-        } else {
-
-            // Trying to set some type of invalid value
-            err = new Error('value can not be used to generate a new object on an un-initialized object field');
-            if (!cb || typeof(cb) !== 'function' || cb(err, this) != true)
-                throw err;
-
-        }
-
-    } else {
-
-        if (value instanceof this._model) {
-
-            // It's an actual model, set it
-            this._value = value;
-            this._isLoaded = true;
-            if (cb && typeof(cb) === 'function') cb(err, this);
-
-        } else if (typeof(value) === 'object') {
-
-            // It's model data, create a new model and set it
-            this._value = new this._model();
-            this._value.set(value);
-            this._isLoaded = true;
-            if (cb && typeof(cb) === 'function') cb(err, this);
-
-        } else if (typeof(value) === 'string') {
-            // It's an id
-            this._value = value;
-            this._isLoaded = false;
-            if (cb && typeof(cb) === 'function') cb(err, this);
-
-        } else {
-            err = new Error('attempted to set invalid value on object field');
-            if (!cb || typeof(cb) !== 'function' || cb(err, this) != true)
-                throw err;
-        }
-
+        if (value && typeof(value.getInline) === 'function')
+            results[key] = value.getInline();
+        else if (value && typeof(value.getValue) === 'function')
+            results[key] = (value.getValue(getAll));
+        else
+            results[key] = (value);
     }
 
-    return this;
+    return results;
 };
 
 
-// Create a property for easier dealing with the array
+// Create a property for easier dealing with the object
 Object.defineProperty(FieldObject.prototype, '_', {
-    get: function() { return this._value; },
+    get: FieldObject.prototype.getObject,
     set: FieldObject.prototype.set
 });
+
+module.exports = FieldObject;
