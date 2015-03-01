@@ -26,10 +26,11 @@ var Model = require('./model'),
 
 
 // Expose the schema class
-CouchCushion.prototype.Schema = Schema; 
+CouchCushion.prototype.Schema = Schema;
 
 // Expose the same Couchbase object that we use
-CouchCushion.prototype.Cb = Couchbase; 
+CouchCushion.prototype.Cb =
+CouchCushion.prototype.Couchbase = Couchbase;
 
 
 /**
@@ -87,8 +88,8 @@ CouchCushion.prototype.setOption = function(option, value) {
  * @param {Model|string} reference - the type of reference
  * @returns {Model}
  */
-CouchCushion.prototype.ref = 
-CouchCushion.prototype.reference = 
+CouchCushion.prototype.ref =
+CouchCushion.prototype.reference =
 function buildReference(name, schema, override) {
     // If the schema was supplied, that means we /should/ be adding a new model
     // to the list.
@@ -99,7 +100,7 @@ function buildReference(name, schema, override) {
             throw new Error('attempted to create already existing reference type: `'+name+'`');
 
         // Create the model, extending the base model class while doing so.
-        
+
         var ref;
 
         // We're using eval here to make it easier to debug.
@@ -132,7 +133,7 @@ function buildReference(name, schema, override) {
  * @param {Object|Schema} [schema]
  * @returns {Model}
  */
-CouchCushion.prototype.model = 
+CouchCushion.prototype.model =
 function buildModel(name, schema, override) {
 
     // If the schema was supplied, that means we /should/ be adding a new model
@@ -144,7 +145,7 @@ function buildModel(name, schema, override) {
             throw new Error('attempted to create already existing model: `'+name+'`');
 
         // Create the model, extending the base model class while doing so.
-        
+
         var model;
 
         // We're using eval here to make it easier to debug.
@@ -279,12 +280,12 @@ function getOneResult(response) {
  * Get a reference document
  *
  */
-CouchCushion.prototype.getReference = 
-CouchCushion.prototype.getRef = 
+CouchCushion.prototype.getReference =
+CouchCushion.prototype.getRef =
 function(name, reference, cb, bucket) {
     bucket = bucket || this.options.bucket;
     var Ref = this.getReferenceType(reference);
-    
+
     // If it has a type, use that, else assume that it is a string
     reference = new Ref(name);
 
@@ -293,7 +294,7 @@ function(name, reference, cb, bucket) {
         if (err) return cb(err, reference, res);
 
         reference.set(getOneResult(res));
-        
+
         debug('received reference: ' + name);
         cb(err, reference, res);
     });
@@ -346,45 +347,45 @@ CouchCushion.prototype.get = function(id, cb, model, bucket) {
     return this;
 };
 
-CouchCushion.prototype.getFromElasticsearch = function(es, cb, model, bucket) {
-    bucket = bucket || this.options.bucket;
-    var Model;
-
-    if (model)
-        Model = this.getModel(model);
-
-    if (!(es && es.test))
-        return cb(new Error('Malformed Elasticsearch Response'));
-
-    var hits = es.hits;
-
-    var docs = [];
-    var requests = hits.map(function(val) {
-        return function(cb) {
-            var err;
-            var doc = val._source.doc;
-
-            if (!Model && doc && doc.type) {
-                Model = self.getModel(doc.type.capitalize(true));
-            }
-
-            if (Model) {
-                model = new Model();
-                model.set(doc);
-            } else {
-                err = 'Could not get model: ' + (val && val.id) || val;
-            }
-
-            debug('received doc: ' + (val && val.id) || val);
-            docs.push(model);
-            cb(err);
-        };
-    });
-
-    async.parallel(requests, function(err) {
-        cb(err, docs, es);
-    });
-};
+// CouchCushion.prototype.getFromElasticsearch = function(es, cb, model, bucket) {
+//     bucket = bucket || this.options.bucket;
+//     var Model;
+//
+//     if (model)
+//         Model = this.getModel(model);
+//
+//     if (!(es && es.test))
+//         return cb(new Error('Malformed Elasticsearch Response'));
+//
+//     var hits = es.hits;
+//
+//     var docs = [];
+//     var requests = hits.map(function(val) {
+//         return function(cb) {
+//             var err;
+//             var doc = val._source.doc;
+//
+//             if (!Model && doc && doc.type) {
+//                 Model = self.getModel(doc.type.capitalize(true));
+//             }
+//
+//             if (Model) {
+//                 model = new Model();
+//                 model.set(doc);
+//             } else {
+//                 err = 'Could not get model: ' + (val && val.id) || val;
+//             }
+//
+//             debug('received doc: ' + (val && val.id) || val);
+//             docs.push(model);
+//             cb(err);
+//         };
+//     });
+//
+//     async.parallel(requests, function(err) {
+//         cb(err, docs, es);
+//     });
+// };
 
 /**
  * Get a single document from a search
@@ -398,7 +399,7 @@ CouchCushion.prototype.getFromElasticsearch = function(es, cb, model, bucket) {
  * @returns {CouchCushion}
  */
 CouchCushion.prototype.getOne = function(model, cb, search, key, doc, bucket) {
-    if (search instanceof Couchbase.ViewQuery || 
+    if (search instanceof Couchbase.ViewQuery ||
        (search.keys && search.key && search.from)) {
 
         return this.oneFromQuery(model, cb, search, bucket);
@@ -422,12 +423,12 @@ CouchCushion.prototype.getOne = function(model, cb, search, key, doc, bucket) {
  * @returns {CouchCushion}
  */
 CouchCushion.prototype.getMany = function(model, cb, search, key, doc, bucket) {
-    
-    if (search instanceof Couchbase.ViewQuery || 
+
+    if (search instanceof Couchbase.ViewQuery ||
        (search.keys && search.key && search.from)) {
-		
+
         return this.fromQuery(model, cb, search, bucket);
-    } else if(typeof search === 'object' && search.bbox) {
+    } else if (typeof search === 'object' && search.bbox) {
         var query = Couchbase.SpatialQuery.from(search.ddoc, search.name).bbox(search.bbox);
         return this.fromQuery(model, cb, query, bucket);
     } else {
@@ -462,16 +463,16 @@ CouchCushion.prototype.fromQuery = function(model, cb, query, bucket) {
         var models = [];
 
         if (res) {
-            
+
             var values = getResults(res);
 
             for (var i = 0; i < values.length; i++) {
                 var resultModel = new RequestModel({ bucket: bucket });
-                
+
                	var modelValue = values[i].value;
                 if(typeof modelValue == "string")
                     modelValue = JSON.parse(modelValue);
-                
+
                 resultModel.set(modelValue);
                 models.push(resultModel);
             }

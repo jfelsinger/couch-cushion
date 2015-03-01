@@ -19,7 +19,7 @@ describe('Fields', function() {
     });
 
     describe('#getField', function() {
-        
+
         it('should throw when no field name is given', function(done) {
             Fields.getField.should.throw();
 
@@ -78,10 +78,13 @@ describe('Fields', function() {
             Fields.getField('enum').name.should.equal('FieldEnum');
 
             Fields.getField.bind(Fields, 'array').should.not.throw();
-            Fields.getField('array').name.should.equal('FieldArray');
+            Fields.getField('array').name.should.equal('FieldObject');
 
             Fields.getField.bind(Fields, 'object').should.not.throw();
             Fields.getField('object').name.should.equal('FieldObject');
+
+            Fields.getField.bind(Fields, 'model').should.not.throw();
+            Fields.getField('model').name.should.equal('FieldModel');
 
             done();
         });

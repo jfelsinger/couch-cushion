@@ -9,7 +9,7 @@ function FieldObject() {
     this.allowOptions('isArray');
     Field.apply(this, arguments);
 
-    if (!this._value) this.set([]);
+    if (!this._value) this.set({});
 }
 
 FieldObject.prototype = Object.create(Field.prototype);
@@ -70,23 +70,37 @@ FieldObject.prototype.save = function saveObject(cb, bucket) {
 };
 
 
-FieldObject.prototype.getValue = function getValue(getAll) {
-    var results = this.options.isArray ?
-        [] :
-        {} ;
+/**
+ * Walk through an object or array and get a value representing it
+ */
+function walkValue(object, isArray, getAll) {
+    var results = this.options.isArray ?  [] : {} ;
 
-    for (var key in this._value) {
-        var value = this._value[key];
+    for (var key in object) {
+        var value = object[key];
 
+        // It's a model that has a getInlint function defined, use that
         if (value && typeof(value.getInline) === 'function')
             results[key] = value.getInline();
+
+        // It's a model of some type, use it's getValue function
         else if (value && typeof(value.getValue) === 'function')
             results[key] = (value.getValue(getAll));
+
+        // No get value function, so it's just a regular ol' object
+        else if (typeof(value) === 'object')
+            results[key] = walkValue(value);
+
         else
             results[key] = (value);
     }
 
     return results;
+}
+
+
+FieldObject.prototype.getValue = function getValue(getAll) {
+    return walkValue(this._value, this.options.isArray, getAll);
 };
 
 
