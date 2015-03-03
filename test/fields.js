@@ -6,54 +6,70 @@ var should = require('should');
 
 describe('Fields', function() {
 
-    it('should have fields', function(done) {
+    it('should have fields', function() {
         Fields.should.have.property('fields');
         Fields.fields.should.be.an.Object;
-
-        done();
     });
 
-    describe('#getScheme', function() {
+    describe('#buildScheme', function() {
+        it('should return an appropriate fields based on scheme', function() {
+            var scheme,field;
 
+            scheme = Object;
+            field = Fields.buildScheme(scheme, 'test');
+            should(field.options.default).be.undefined;
+            should(field._).be.an.Object;
 
+            scheme = { field: Object };
+            field = Fields.buildScheme(scheme, 'test');
+            should(field.options.default).be.undefined;
+            should(field._).be.an.Object;
+
+            scheme = { field: Object, default: [] };
+            field = Fields.buildScheme(scheme, 'test');
+            should(field.options.default).be.an.Array;
+            should(field._).be.an.Array;
+
+            scheme = Array,
+            field = Fields.buildScheme(scheme, 'test');
+            should(field.options.default).be.an.Array;
+            should(field._).be.an.Array;
+
+            scheme = { field: Array };
+            field = Fields.buildScheme(scheme, 'test');
+            should(field.options.default).be.an.Array;
+            should(field._).be.an.Array;
+        });
     });
 
     describe('#getField', function() {
 
-        it('should throw when no field name is given', function(done) {
+        it('should throw when no field name is given', function() {
             Fields.getField.should.throw();
-
-            done();
         });
 
-        it('should return a field by name', function(done) {
+        it('should return a field by name', function() {
             Fields.getField.bind(Fields, 'id').should.not.throw();
 
             var Id = Fields.getField('id');
             Id.should.be.a.Function;
-
-            done();
         });
 
-        it('should return a field by an aliased name', function(done) {
+        it('should return a field by an aliased name', function() {
             Fields.getField.bind(Fields, 'Id').should.not.throw();
 
             var Id = Fields.getField('Id');
             Id.should.be.a.Function;
-
-            done();
         });
 
-        it('should return a field by a type', function(done) {
+        it('should return a field by a type', function() {
             Fields.getField.bind(Fields, String).should.not.throw();
 
             var stringField = Fields.getField(String);
             stringField.should.be.a.Function;
-
-            done();
         });
 
-        it('should return a the proper fields', function(done) {
+        it('should return a the proper fields', function() {
             var field;
 
             Fields.getField.bind(Fields, 'id').should.not.throw();
@@ -85,8 +101,6 @@ describe('Fields', function() {
 
             Fields.getField.bind(Fields, 'model').should.not.throw();
             Fields.getField('model').name.should.equal('FieldModel');
-
-            done();
         });
     });
 });

@@ -51,6 +51,23 @@ for (var field in fields)
     module.exports[field] = fields[field];
 
 /**
+ * Returns a name for a field based on a schama stricture
+ *
+ * @returns {String}
+ */
+module.exports.getFieldName = function getFieldName(fieldName) {
+
+    if (fieldName === undefined) {
+        throw new Error('Field name not specificied');
+    }
+
+    if (typeof(fieldName) === 'function')
+        fieldName = fieldName.name;
+
+    return fieldName;
+}
+
+/**
  * Return a particuler field based on a schema structure
  *
  * @returns {Field}
@@ -59,12 +76,7 @@ module.exports.get =
 module.exports.getField = function getField(fieldName) {
     var field;
 
-    if (fieldName === undefined) {
-        throw new Error('Field name not specificied');
-    }
-
-    if (typeof(fieldName) === 'function')
-        fieldName = fieldName.name;
+    fieldName = this.getFieldName(fieldName);
 
     // Check for an alias
     if (FIELDALIASES[fieldName])
@@ -74,7 +86,7 @@ module.exports.getField = function getField(fieldName) {
     if (fields[fieldName])
         field = fields[fieldName];
     else
-        throw new Error('Requested field `' + fieldName + '` not found');
+        throw new Error('Requested field type `' + fieldName + '` not found');
 
     return field;
 };
@@ -100,6 +112,15 @@ module.exports.buildScheme = function buildScheme(scheme, name, cushion) {
 
     var value = scheme.value;
     var field = this.getField(scheme.field);
+
+    // A special case for Object fields that are set to actually be Arrays.
+    // Arrays and generic objects share the same type of field, but if the
+    // schema was explicitly said to be an array we want to default it to a
+    // value that is also an array `[]`. This simplifies schema definitions.
+    if (this.getFieldName(scheme.field).toLowerCase() === 'array' &&
+        scheme.default == undefined)
+        scheme.default = [];
+
     scheme = new field(scheme, value, cushion);
 
     return scheme;
