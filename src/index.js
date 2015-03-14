@@ -49,6 +49,15 @@ CouchCushion.prototype.connect = function connect(options) {
         cluster.openBucket(options.bucket, options.bucketPassword) :
         cluster.openBucket(options.bucket);
 
+    if (options.connectionTimeout)
+        bucket.connectionTimeout = options.connectionTimeout;
+    if (options.operationTimeout)
+        bucket.operationTimeout = options.operationTimeout;
+    if (options.viewTimeout)
+        bucket.viewTimeout = options.viewTimeout;
+    if (options.managementTimeout)
+        bucket.managementTimeout = options.managementTimeout;
+
     this.options.cluster = cluster;
     this.options.bucket = bucket;
 
