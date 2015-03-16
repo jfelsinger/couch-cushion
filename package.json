@@ -21,7 +21,7 @@
   "dependencies": {
     "node-uuid": "^1.4.2",
     "moment": "^2.8.4",
-    "couchbase": "^2.0.5",
+    "couchbase": "2.0.4",
     "async": "^0.9.0",
     "debug": "^2.1.1"
   }
