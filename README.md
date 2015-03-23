@@ -166,7 +166,7 @@ user.options._.status = 'online';
 
 # Document Naming
 
-In most cases documents modeled by couch-cushion will require an id field. The
+In most cases documents modeled by couch-cushion will require an `id` field. The
 id field is required and will be used by couch-cushion as the document's name in
 Couchbase.
 
