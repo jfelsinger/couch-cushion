@@ -9,7 +9,7 @@ npm install --save git+ssh://git@bitbucket.org:iconiqgmbh/couch-cushion-odm.git
 
 ### Basic Usage
 
-```
+```javascript
 var cushion = require('couch-cushion');
 cushion.options.bucket = bucket; // Set the bucket for it to use
 
@@ -49,7 +49,7 @@ Models can be defined with plain objects as their schemas, as demonstrated in
 the *Basic Usage* example, however much more robust functionality can be had by
 defining a full-fledged Schema object instead.
 
-```
+```javascript
 var Cushion = require('couch-cushion'),
     crypto = require('crypto');
 
@@ -93,7 +93,7 @@ cushion.model('User', User);
 
 Our model then becomes available wherever we use couch-cushion.
 
-```
+```javascript
 var User = cushion.model('User');
 
 var user = new User();
@@ -124,7 +124,7 @@ for more user-informative schemas.
 All the generic object types are aliased so that a schema can be defined using
 the type itself, rather than a string. Ex:
 
-```
+```javascript
 schema = { 'followers': Array }
 // vs.
 schema = { 'followers': 'array' };
@@ -137,7 +137,7 @@ field. Models and objects (also subsequently arrays), because of their
 complexity cannot have their values accessed directly, instead the value must be
 accessed via a helper property (`_`).
 
-```
+```javascript
 var User = cushion.model('User', {
     id: 'id',
     username: String,
