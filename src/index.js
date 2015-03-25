@@ -544,7 +544,7 @@ CouchCushion.prototype.oneFromQuery = function(model, cb, query, bucket) {
 /**
  * Build a view query
  */
-function buildViewQuery(view, key, doc, isMultiKeyQuery) {
+function buildViewQuery(view, key, doc, isMultiKeyQuery, stale) {
     if (!doc) {
         // Get the document name
     }
@@ -565,6 +565,9 @@ function buildViewQuery(view, key, doc, isMultiKeyQuery) {
             query = query.key(key);
     }
 
+    // By default we don't want to use CB's annoying caching
+    query = query.stale(stale || 1);
+
     return query;
 }
 
@@ -580,7 +583,7 @@ function buildViewQuery(view, key, doc, isMultiKeyQuery) {
  * @returns {CouchCushion}
  */
 CouchCushion.prototype.fromView = function(model, cb, view, key, doc, bucket, isMultiKey) {
-    var query = buildViewQuery(view, key, doc, isMultiKey);
+    var query = buildViewQuery(view, key, doc, isMultiKey, this.options.stale);
     return this.fromQuery(model, cb, query, bucket);
 };
 
@@ -596,6 +599,6 @@ CouchCushion.prototype.fromView = function(model, cb, view, key, doc, bucket, is
  * @returns {CouchCushion}
  */
 CouchCushion.prototype.oneFromView = function(model, cb, view, key, doc, bucket, isMultiKey) {
-    var query = buildViewQuery(view, key, doc, isMultiKey);
+    var query = buildViewQuery(view, key, doc, isMultiKey, this.options.stale);
     return this.oneFromQuery(model, cb, query, bucket);
 };
