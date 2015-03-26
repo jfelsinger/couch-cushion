@@ -12,15 +12,12 @@ var Couchbase = require('couchbase'),
  */
 function CouchCushion() {
     this._models = {};
-    this._refmodels = {};
     this.options = {};
-
 }
 
 module.exports = exports = new CouchCushion();
 
 var Model = require('./model'),
-    Reference = require('./reference'),
     Schema = require('./schema');
 
 
@@ -91,57 +88,14 @@ CouchCushion.prototype.setOption = function(option, value) {
 
 
 /**
- * Create a reference model
- *
- * @param {*} type - the document type that will be referenced
- * @param {Model|string} reference - the type of reference
- * @returns {Model}
- */
-CouchCushion.prototype.ref =
-CouchCushion.prototype.reference =
-function buildReference(name, schema, override) {
-    // If the schema was supplied, that means we /should/ be adding a new model
-    // to the list.
-    if (schema) {
-        debug('creating reference model: ' + name);
-
-        if (this._refmodels[name] && !override)
-            throw new Error('attempted to create already existing reference type: `'+name+'`');
-
-        // Create the model, extending the base model class while doing so.
-
-        var ref;
-
-        // We're using eval here to make it easier to debug.
-        /* jslint evil:true */
-        eval('ref = function ' + name + '() { Reference.apply(this, arguments); }');
-
-        ref.prototype = Object.create(Reference.prototype);
-        ref.prototype.constructor = ref;
-        ref.prototype.cushion = this;
-
-        // TODO: validate the schema before applying it
-        ref.prototype.schema = schema;
-
-        this._refmodels[name] = ref;
-    }
-
-    // Make sure the model exists
-    if (!this._refmodels[name])
-        throw new Error('attempted to get non-existent model: `'+name+'`');
-
-    debug('returning reference model: ' + name);
-    return this._refmodels[name];
-};
-
-
-/**
  * Create a model that can be used, or return a model
  *
  * @param {string} name
  * @param {Object|Schema} [schema]
  * @returns {Model}
  */
+CouchCushion.prototype.ref =
+CouchCushion.prototype.reference =
 CouchCushion.prototype.model =
 function buildModel(name, schema, override) {
 
@@ -240,27 +194,6 @@ CouchCushion.prototype.getModel = function(model) {
 };
 
 
-/**
- * Gets a ref from the reference list
- *
- * @param {Reference|string} ref
- * @returns {Reference}
- */
-CouchCushion.prototype.getReferenceType = function(ref) {
-    var result;
-
-    if (typeof(ref) === 'function' &&
-        this._refmodels[ref.name])
-    {
-        result = ref;
-    } else {
-        result = this._refmodels[ref];
-    }
-
-    return result;
-};
-
-
 function getResults(response) {
     var value = response;
 
@@ -293,10 +226,10 @@ CouchCushion.prototype.getReference =
 CouchCushion.prototype.getRef =
 function(name, reference, cb, bucket) {
     bucket = bucket || this.options.bucket;
-    var Ref = this.getReferenceType(reference);
+    var Ref = this.getModel(reference);
 
     // If it has a type, use that, else assume that it is a string
-    reference = new Ref(name);
+    reference = new Ref({ name: name });
 
     debug('getting reference:  ' + name);
     bucket.get(name, function(err, res) {
@@ -479,7 +412,7 @@ CouchCushion.prototype.fromQuery = function(model, cb, query, bucket) {
                 var resultModel = new RequestModel({ bucket: bucket });
 
                	var modelValue = values[i].value;
-                if (typeof modelValue == "string")
+                if (typeof modelValue == 'string')
                     modelValue = JSON.parse(modelValue);
 
                 resultModel.set(modelValue);

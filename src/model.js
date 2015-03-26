@@ -9,6 +9,7 @@ var debugSave = require('debug')('couch-cushion:model:save');
  */
 function Model(options) {
     this.options = {};
+    this._name = null;
     this._fields = {};
     this._computed = {};
     this._methods = {};
@@ -21,14 +22,23 @@ function Model(options) {
 
         this.options = options;
 
-        if (options.bucket) this.options.bucket = options.bucket;
-
+        if (options.name) {
+            this._name = options.name + '';
+            if (this.options.name) delete this.options.name;
+        }
     }
 
     _initFields(this);
 
-    if (this._fields.id)
-        this._fields.id.generate(this._fields.id._prefix || this._fields.type.get());
+    if (this._fields.id) {
+        var prefix = this._fields.id._prefix;
+        if (!prefix && this._fields.type) prefix = this._fields.type.get();
+        this._fields.id.generate(prefix);
+
+        // If the document doesn't have its own name use the id
+        if (!this._name)
+            this._name = this._fields.id.get();
+    }
 }
 
 module.exports = Model;
@@ -43,6 +53,20 @@ Model.prototype.schema = {
     id: 'Id',
     type: 'Constant'
 };
+
+/**
+ * Define the `name` property, used as the document name to get from the db
+ */
+Object.defineProperty(Model.prototype, 'name', {
+    get: function() {
+        if (this._name)
+            return this._name;
+
+        else if (this._fields.id)
+            return this._fields.id.get();
+    },
+    set: function(val) { this._name = val + ''; }
+});
 
 
 /**
@@ -143,17 +167,17 @@ function _initFields(model) {
  *
  * @return {Model}
  */
-Model.prototype.set = 
-Model.prototype.primeData = 
+Model.prototype.set =
+Model.prototype.primeData =
 function(data, cb) {
     if (typeof(data) !== 'object' && typeof(data) !== 'function')
         throw new Error('Invalid parameter `data` given');
 
     debug('setting model data...');
 
-    cb = cb || function() { 
+    cb = cb || function() {
         debug('model data set');
-        return true; 
+        return true;
     };
 
     // Just a bunch of potential logging stuff to replace the above
@@ -199,8 +223,6 @@ Model.prototype.save = function(cb, bucket) {
     if (!bucket)
         return cb(new Error('No available buckets'));
 
-    var id = this._fields.id.get();
-
     // Update the updated date
     if (this._fields.updated)
         this._fields.updated.set(new Date());
@@ -215,13 +237,13 @@ Model.prototype.save = function(cb, bucket) {
     }, (function (err) {
         if (err) return cb(err);
 
-        debugSave('saving model: ' + id + ' \r\n', this.getValue());
+        debugSave('saving model: ' + this.name + ' \r\n', this.getValue());
 
         if (!bucket) {
             return cb(new Error('Bucket has gone missing'));
         }
 
-        bucket.upsert(id, this.getValue(), cb);
+        bucket.upsert(this.name, this.getValue(), cb);
 
     }).bind(this));
 
@@ -266,7 +288,7 @@ Model.prototype.getValue = function(getAll, asJson, withComputed, withMethods) {
     // This adds all of the fields and their values to the result, which will
     // then go to the db. Question:
     //
-    // We don't have to, but should we include fields that have a non-set or 
+    // We don't have to, but should we include fields that have a non-set or
     // falsy values? undefined, null, and '' are all pretty much equvalent to no
     // value being there at all. We could save some space by filtering out these
     // values when saving to the db.
