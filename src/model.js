@@ -116,6 +116,7 @@ function _initFields(model) {
             var method = methods[methodName];
             model._methods[methodName] = method;
 
+            debug('adding method `'+methodName+'` to model: ', model);
             Object.defineProperty(model, methodName, {
                 value: method
             });
@@ -212,38 +213,38 @@ function(data, cb) {
 };
 
 /**
- * Save's the model to the bucket
+ * Save's the model to the db
  *
  * @param {*} cb
- * @param {*} [bucket]
+ * @param {*} [db]
  * @returns {*}
  */
-Model.prototype.save = function(cb, bucket) {
-    bucket = bucket || this.options.bucket;
-    if (!bucket)
-        return cb(new Error('No available buckets'));
+Model.prototype.save = function(cb, db) {
+    db = db || this.options.adapter;
+    if (!db)
+        return cb(new Error('No available adapter'));
 
     // Update the updated date
     if (this._fields.updated)
         this._fields.updated.set(new Date());
 
+    // Save all of the fields that support saving themselves
     var saves = [];
     for (var key in this._fields)
         if (this._fields[key].save && typeof(this._fields[key].save) === 'function')
             saves.push(this._fields[key].save.bind(this));
 
     require('async').each(saves, function(save, cb) {
-        save(cb, bucket);
+        save(cb, db);
     }, (function (err) {
         if (err) return cb(err);
 
         debugSave('saving model: ' + this.name + ' \r\n', this.getValue());
 
-        if (!bucket) {
-            return cb(new Error('Bucket has gone missing'));
-        }
+        if (!db) { return cb(new Error('Database has gone missing')); }
 
-        bucket.upsert(this.name, this.getValue(), cb);
+        // Start the save
+        db.save(this.name, this.getValue(), cb);
 
     }).bind(this));
 
