@@ -10,8 +10,11 @@ npm install --save git+ssh://git@bitbucket.org:iconiqgmbh/couch-cushion-odm.git
 ### Basic Usage
 
 ```javascript
-var cushion = require('couch-cushion');
-cushion.options.bucket = bucket; // Set the bucket for it to use
+var cushion = require('couch-cushion'),
+    adapter = require('cushion-adapter-couchbase');
+
+cushion.install(adapter);
+cushion.connect({ /* connection config */ });
 
 var User = cushion.model('User', {
     id: { field: 'id', prefix: 'usr' },
