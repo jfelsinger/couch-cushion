@@ -50,7 +50,7 @@ FieldObject.prototype.set = function set(value) {
 /**
  * Try and save all of the elements of the object
  */
-FieldObject.prototype.save = function saveObject(cb, bucket) {
+FieldObject.prototype.save = function saveObject(cb, db) {
     var saves = [];
     for (var key in this._value) {
         var value = this._value[key];
@@ -59,7 +59,7 @@ FieldObject.prototype.save = function saveObject(cb, bucket) {
     }
 
     require('async').each(saves, function(save, cb) {
-        save(cb, bucket);
+        save(cb, db);
     }, function (err) {
         if (cb && typeof(cb) === 'function') cb(err);
     });

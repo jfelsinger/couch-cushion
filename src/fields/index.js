@@ -65,7 +65,7 @@ module.exports.getFieldName = function getFieldName(fieldName) {
         fieldName = fieldName.name;
 
     return fieldName;
-}
+};
 
 /**
  * Return a particuler field based on a schema structure
