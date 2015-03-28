@@ -10,7 +10,7 @@ describe('Reference', function() {
     it('should construct', function(done) {
         var ref = new Reference({ name: 'doc::ref' });
 
-        ref.should.have.property('name', 'doc::ref');
+        ref.should.have.property('_name', 'doc::ref');
 
         done();
     });
@@ -19,7 +19,8 @@ describe('Reference', function() {
         var List = cushion.ref('List');
         var ref = new List({ name: 'users::all' });
 
-        ref.should.have.property('name', 'users::all');
+        ref.should.have.property('_name', 'users::all');
+        ref.should.have.property('_id', 'users::all');
 
         done();
     });

@@ -57,13 +57,13 @@ Model.prototype.schema = {
 /**
  * Define the `name` property, used as the document name to get from the db
  */
-Object.defineProperty(Model.prototype, 'name', {
+Object.defineProperty(Model.prototype, '_id', {
     get: function() {
+        if (this._fields.id)
+            return this._fields.id.get();
+
         if (this._name)
             return this._name;
-
-        else if (this._fields.id)
-            return this._fields.id.get();
     },
     set: function(val) { this._name = val + ''; }
 });
@@ -209,6 +209,11 @@ function(data, cb) {
             this._fields[key].set(data[key], cb(key, data[key]));
         }
 
+    if (data.id && this._fields.id &&
+        this._fields.id instanceof Fields.id) {
+        this._name = this._fields.id.get();
+    }
+
     return this;
 };
 
@@ -239,12 +244,12 @@ Model.prototype.save = function(cb, db) {
     }, (function (err) {
         if (err) return cb(err);
 
-        debugSave('saving model: ' + this.name + ' \r\n', this.getValue());
+        debugSave('saving model: ' + this._id + ' \r\n', this.getValue());
 
         if (!db) { return cb(new Error('Database has gone missing')); }
 
         // Start the save
-        db.save(this.name, this.getValue(), cb);
+        db.save(this._id, this.getValue(), cb);
 
     }).bind(this));
 
