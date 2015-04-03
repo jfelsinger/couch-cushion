@@ -8,9 +8,9 @@ function FieldId(options) {
     Field.apply(this, arguments);
 
     if (options) {
-        if (options.prefix) 
-            this._prefix = 
-            this.options.prefix = 
+        if (options.prefix)
+            this._prefix =
+            this.options.prefix =
             options.prefix;
     }
 }

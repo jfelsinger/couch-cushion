@@ -31,13 +31,17 @@ function Model(options) {
     _initFields(this);
 
     if (this._fields.id) {
-        var prefix = this._fields.id._prefix;
-        if (!prefix && this._fields.type) prefix = this._fields.type.get();
-        this._fields.id.generate(prefix);
+        if (this._name) {
+            // If there is a name set, use it for the id
+            this._fields.id.set(this._name);
+        } else {
+            // Else, generate an id and set the name to it.
+            var prefix = this._fields.id._prefix;
+            if (!prefix && this._fields.type) prefix = this._fields.type.get();
+            this._fields.id.generate(prefix);
 
-        // If the document doesn't have its own name use the id
-        if (!this._name)
             this._name = this._fields.id.get();
+        }
     }
 }
 
