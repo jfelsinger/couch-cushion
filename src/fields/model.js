@@ -19,7 +19,7 @@ function FieldModel(options, value, _cushion) {
     this._isInline = false;
     this._model = undefined;
 
-    cushion = _cushion || require('couch-cushion');
+    cushion = _cushion || require('../..');
 
     if (options) {
 

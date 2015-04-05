@@ -38,8 +38,7 @@ gulp.task('test', ['lint'], function() {
 
 gulp.task('tr-test', function() {
     return gulp.src('test/**/*.js')
-        .pipe(mocha({ reporter: 'list' }))
-        .on('error', handle);
+        .pipe(mocha({ reporter: 'list' }));
 });
 
 gulp.task('watch', ['test'], function() {
