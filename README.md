@@ -4,8 +4,16 @@
 ### Installation
 
 ```
-npm install --save git+ssh://git@bitbucket.org:iconiqgmbh/couch-cushion-odm.git
+npm install --save couch-cushion
+npm install --save cushion-adapter-couchbase
 ```
+
+Note: The odm itself has recently been decoupled from the Couchbase Node SDK so
+that the objects you use and create via the odm can be used with more
+versatility; i.e. using Couch Cushion ODM on the front-end without having to
+also have the entire Couchbase SDK with it as well.
+
+This lets you use the same models on the front-end as on the backend. :D
 
 ### Basic Usage
 
