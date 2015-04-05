@@ -82,7 +82,7 @@ describe('ObjectField', function() {
 
             done();
         });
-
+        
     });
 
     describe('#getValue', function() {
