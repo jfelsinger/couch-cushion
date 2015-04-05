@@ -1,10 +1,11 @@
 language: node_js
 node_js:
-  - '0.10'
+- '0.10'
 deploy:
   provider: npm
-  api_key:
-    secure: caiz3hBJotU644WfUyPyWZPXGPbIyGNiZnRiVNRbAWEH7mY/0ZXrntxnowFT9eduPK5doFSQUsruLgTK0bvvDRn+gRSrRtjCFgadcWmUNjGUrFTA34jiBBDDIKQu29V29qqptC7Wg6jfOkOdH4fpvrDTEe8qe8EGSGZHLJ/pnpM=
   email: jffelsinger@gmail.com
+  api_key:
+    secure: FAkNDZdQL+CIpyO8lBVbxAmTMZ06Y3/MaZNF2NW0hYSXPJtL3HeZplUm2Nuhfm17dfBXoF09bO+18J95d5ipG5kQAdfD746biI6fhBUk8suzq8fyABjm361WaK7Mdn0AZD445fsAKluUX+Lg6odV4OTVIGpJTAHmVE/1MNjTqKQ=
   on:
     tags: true
+    repo: jfelsinger/couch-cushion
