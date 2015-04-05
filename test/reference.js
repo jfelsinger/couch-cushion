@@ -1,7 +1,7 @@
 'use strict';
 
 var Reference = require('../src/model'),
-    cushion = require('couch-cushion');
+    cushion = require('..');
 
 var should = require('should');
 
