@@ -1,7 +1,7 @@
 {
   "name": "couch-cushion",
   "version": "0.3.0",
-  "description": "",
+  "description": "An ODM build for working with Couchbase",
   "main": "index.js",
   "scripts": {
     "test": "node ./node_modules/gulp/bin/gulp.js tr-test"
