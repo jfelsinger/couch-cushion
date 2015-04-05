@@ -1,6 +1,6 @@
 'use strict';
 
-var Cushion = require('couch-cushion'),
+var Cushion = require('../../index'),
     Schema = require('../schema');
 
 var List = new Schema({
