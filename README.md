@@ -25,6 +25,7 @@ cushion.install(adapter);
 cushion.connect({ /* connection config */ });
 
 var User = cushion.model('User', {
+    // Used by the ODM for automatically creating a key
     id: { field: 'id', prefix: 'usr' },
     type: { field: 'constant', value: 'user' },
     username: String,
@@ -173,17 +174,6 @@ var followersCopy = user.followers._.slice();
 // This is also true for object properties.
 user.options._.status = 'online';
 ```
-
-
-# Document Naming
-
-In most cases documents modeled by couch-cushion will require an `id` field. The
-id field is required and will be used by couch-cushion as the document's name in
-Couchbase.
-
-
-
-
 
 ---
 

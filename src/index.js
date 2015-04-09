@@ -9,6 +9,7 @@ var async = require('async');
  * @class
  */
 function CouchCushion() {
+    this._plugins = {};
     this._adapter = {};
     this._models = {};
     this.options = {};
@@ -223,7 +224,7 @@ CouchCushion.prototype.get = function(id, cb, model, db) {
             }
 
             if (Model) {
-                model = new Model();
+                model = new Model({ name: id });
                 model.set(res.value);
             } else {
                 err = 'could not get model';
