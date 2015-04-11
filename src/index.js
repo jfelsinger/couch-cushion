@@ -11,6 +11,7 @@ var async = require('async');
 function CouchCushion() {
     this._adapter = {};
     this._models = {};
+    this._plugins = {};
     this.options = {};
 }
 
