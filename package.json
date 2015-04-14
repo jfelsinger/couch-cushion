@@ -1,6 +1,6 @@
 {
   "name": "couch-cushion",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "An ODM build for working with Couchbase",
   "main": "index.js",
   "scripts": {
