@@ -12,6 +12,7 @@ function CouchCushion() {
     this._plugins = {};
     this._adapter = {};
     this._models = {};
+    this._plugins = {};
     this.options = {};
 }
 
