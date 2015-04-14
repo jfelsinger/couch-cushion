@@ -3,8 +3,7 @@
 var Fields = require('../src/fields'),
     Model = require('../src/model'),
     Schema = require('../src/schema'),
-    cushion = require('..'),
-    bucket = require('../lib/mocks/bucket');
+    cushion = require('..');
 
 var should = require('should');
 
@@ -164,9 +163,6 @@ describe('Couch Cushion', function() {
         });
 
     });
-
-    // TODO: mock up a *better* couchbase db for all of this...
-    cushion.options.bucket = bucket;
 
     describe('#connect', function() {
     });
