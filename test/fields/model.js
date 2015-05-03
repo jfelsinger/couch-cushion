@@ -1,8 +1,10 @@
 'use strict';
 
 var ModelField = require('../../src/fields/model'),
-    bucket = require('../../lib/mocks/bucket'),
     cushion = require('../..');
+
+var should = require('should'),
+    sinon = require('sinon');
 
 //
 // TODO:
@@ -10,7 +12,6 @@ var ModelField = require('../../src/fields/model'),
 //
 
 describe('ModelField', function() {
-    cushion.options.bucket = bucket;
     if (!cushion._models.Test) {
         var schemaName = 'Test';
         var testSchema = {
@@ -69,6 +70,44 @@ describe('ModelField', function() {
         var complexCopy = new ComplexModel(complex.getValue());
 
         done();
+    });
+
+    describe('#save', function() {
+        var db, spy;
+
+        beforeEach(function() {
+            db = {};
+            db.save = sinon.stub().callsArg(2);
+
+            field = new ModelField();
+        })
+
+        // it ('should throw without an adapter', function() {
+        //     model.save.bind(model).should.throw();
+        // });
+
+        it('should return cb', function(done) {
+            field.save(done, db);
+        });
+
+        it('should not call save by default', function(done) {
+            field.save(function() {
+                should(db.save.called).be.false;
+                done();
+            }, db);
+        });
+
+        it('should call save when loaded and has value', function(done) {
+            field._isLoaded = true;
+            field._value = {};
+            field._value.save = function(done, _db) {
+                _db.should.match(db);
+                done();
+            };
+
+            field.save(done, db);
+        });
+
     });
 
     describe('#getValue', function() {

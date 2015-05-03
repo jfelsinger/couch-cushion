@@ -37,13 +37,13 @@ gulp.task('test', ['lint'], function(cb) {
         'lib/**/*.js',
         'src/**/*.js',
     ])
-        .on('error', handle)
         .pipe(istanbul())
         .pipe(istanbul.hookRequire())
+        .on('error', handle)
         .on('finish', function() {
             gulp.src('test/**/*.js')
-                .on('error', handle)
                 .pipe(mocha({ reporter: 'list' }))
+                .on('error', handle)
                 .pipe(istanbul.writeReports())
                 .on('end', cb);
         });

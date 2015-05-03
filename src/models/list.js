@@ -30,7 +30,7 @@ List.method(function push() {
  * Proxy for the pop function
  */
 List.method(function pop() {
-    return Array.prototype.pop(this.values._, arguments);
+    return Array.prototype.pop.apply(this.values._, arguments);
 });
 
 
@@ -55,7 +55,7 @@ List.method(function unshift() {
  * Proxy for the shift function
  */
 List.method(function shift() {
-    return Array.prototype.shift(this.values._, arguments);
+    return Array.prototype.shift.apply(this.values._, arguments);
 });
 
 

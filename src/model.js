@@ -130,21 +130,18 @@ function _initFields(model) {
     function setComputed(computedProperties) {
         debug('initializing schema computed properties');
         for (var name in computedProperties) {
-            var computed = computedProperties[name];
+            var computed = computedProperties[name],
+                propertyOptions = {
+                    get: computed.getter,
+                    enumberable: true
+                };
+
             model._computed[name] = computed;
 
-            if (computed.setter) {
-                Object.defineProperty(model, name, {
-                    get: computed.getter,
-                    set: computed.setter,
-                    enumerable: true
-                });
-            } else {
-                Object.defineProperty(model, name, {
-                    get: computed.getter,
-                    enumerable: true
-                });
-            }
+            if (computed.setter)
+                propertyOptions.set = computed.setter;
+
+            Object.defineProperty(model, name, propertyOptions);
         }
     }
 

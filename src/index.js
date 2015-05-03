@@ -48,7 +48,10 @@ function installAdapter(installer, options) {
 
 CouchCushion.prototype.connect =
 function connect() {
-    this._adapter.connect.apply(this._adapter, arguments);
+    if (this._adapter && this._adapter.connect)
+        this._adapter.connect.apply(this._adapter, arguments);
+    else
+        throw new Error('No adapter installed that can be connected to');
 
     return this;
 };

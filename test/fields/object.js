@@ -1,7 +1,8 @@
 'use strict';
 
 var ObjectField = require('../../src/fields/object');
-var should = require('should');
+var should = require('should'),
+    sinon = require('sinon');
 
 //
 // TODO:
@@ -82,7 +83,25 @@ describe('ObjectField', function() {
 
             done();
         });
-        
+
+    });
+
+    describe('#save', function() {
+        var db = {};
+        db.save = sinon.stub().callsArg(2);
+
+        beforeEach(function() {
+            field = new ObjectField();
+        })
+
+        // it ('should throw without an adapter', function() {
+        //     model.save.bind(model).should.throw();
+        // });
+
+        it('should call save function on db', function(done) {
+            field.save(done, db);
+        });
+
     });
 
     describe('#getValue', function() {

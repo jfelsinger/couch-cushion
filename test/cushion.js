@@ -5,7 +5,8 @@ var Fields = require('../src/fields'),
     Schema = require('../src/schema'),
     cushion = require('..');
 
-var should = require('should');
+var should = require('should'),
+    sinon = require('sinon');
 
 describe('Couch Cushion', function() {
     var schemaName = 'Test';
@@ -34,6 +35,7 @@ describe('Couch Cushion', function() {
 
         cushion.should.have.property('save');
         cushion.should.have.property('get');
+        cushion.should.have.property('Db');
 
         cushion.should.have.property('Schema');
         cushion.Schema.should.match(Schema);
@@ -49,6 +51,33 @@ describe('Couch Cushion', function() {
         _cushion.options.should.have.property('test', option);
 
         done();
+    });
+
+    describe('#install', function() {
+        var mockAdapter = {};
+        mockAdapter.install = sinon.stub();
+
+        it('should call the install function of the adapter', function() {
+            cushion.install(mockAdapter);
+            should(mockAdapter.install.called).be.true;
+        });
+
+    });
+
+    describe('#connect', function() {
+        var mockAdapter = {};
+        mockAdapter.connect = sinon.stub();
+
+        it('should throw when there is no adapter', function() {
+            cushion.connect.bind(cushion).should.throw();
+        });
+
+        it('should call connect on adapter', function() {
+            cushion._adapter = mockAdapter;
+            cushion.connect();
+            should(mockAdapter.connect.called).be.true;
+            cushion._adapter = undefined;
+        });
     });
 
     describe('#getOption', function() {
