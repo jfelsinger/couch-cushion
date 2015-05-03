@@ -2,6 +2,7 @@
 *.swp
 *.orig
 desktop.ini
+coverage
 
 .DS_Store
 npm-debug.log
