@@ -1,4 +1,4 @@
-# Couch Cushion ODM
+# Couch Cushion ODM [![Build Status](https://secure.travis-ci.org/jfelsinger/couch-cushion.png?branch=master)](https://travis-ci.org/jfelsinger/couch-cushion) [![Analytics](https://ga-beacon.appspot.com/UA-46797352-2/couch-cushion/index)](https://github.com/igrigorik/ga-beacon)
 ## A Node.js ODM for Couchbase
 
 ### Installation
