@@ -307,7 +307,12 @@ Model.prototype.getValue = function(getAll, asJson, withComputed, withMethods) {
     //  - logic to filter out the values might slow things down
     //      if (value != false || value === false)
     for (key in this._fields)
-        result[key] = this._fields[key].getValue(getAll);
+        try {
+            result[key] = this._fields[key].getValue(getAll);
+        } catch(e) {
+            debug('error on field, %s : %s', key, this._fields[key]._value, this);
+            throw e;
+        }
 
     if (asJson) result = JSON.stringify(result);
 

@@ -14,6 +14,9 @@ FieldDate.prototype = Object.create(Field.prototype);
 FieldDate.prototype.constructor = FieldDate;
 
 FieldDate.prototype.set = function set(value) {
+    // Guard against error-causing falsey values
+    value = value || null;
+
     this._value = new Date(value);
 };
 
