@@ -12,6 +12,7 @@ var fields = {
     enum:       require('./enum'),
     object:     require('./object'),
     model:      require('./model'),
+    refArray:   require('./ref-array'),
 };
 
 var FIELDALIASES = {
@@ -43,6 +44,17 @@ var FIELDALIASES = {
 
   'Model':      'model',
   'model':      'model',
+
+  'Reference':        'refArray',
+  'reference':        'refArray',
+  'References':       'refArray',
+  'references':       'refArray',
+  'RefArray':         'refArray',
+  'Ref-Array':        'refArray',
+  'Ref-array':        'refArray',
+  'ref-array':        'refArray',
+  'Reference-array':  'refArray',
+  'reference-array':  'refArray',
 };
 
 module.exports.fields = fields;
@@ -51,7 +63,7 @@ for (var field in fields)
     module.exports[field] = fields[field];
 
 /**
- * Returns a name for a field based on a schama stricture
+ * Returns a name for a field based on a schema stricture
  *
  * @returns {String}
  */
@@ -103,6 +115,19 @@ module.exports.buildScheme = function buildScheme(scheme, name, cushion) {
         };
     } else if (typeof(scheme) !== 'object') {
         throw new Error('expected schema fields to be strings or objects');
+    }
+
+    if (Array.isArray(scheme) && scheme[0]) {
+        scheme = {
+            field: 'refArray',
+            referenceScheme: scheme[0],
+        };
+
+        if (typeof(scheme.referenceScheme) === 'object')
+            scheme.modelType = (
+                scheme.referenceScheme.modelType ||
+                scheme.referenceScheme.model
+            );
     }
 
     if (name && !scheme.name)

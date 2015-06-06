@@ -1,7 +1,8 @@
 'use strict';
 
+require('../../lib/capitalize');
 var ModelField = require('../../src/fields/model'),
-    cushion = require('../..');
+    CouchCushion = require('../../src');
 
 var should = require('should'),
     sinon = require('sinon');
@@ -12,42 +13,43 @@ var should = require('should'),
 //
 
 describe('ModelField', function() {
-    if (!cushion._models.Test) {
-        var schemaName = 'Test';
-        var testSchema = {
+    var field, cushion;
+    var schemaName, schema,
+        modelSchemaName, modelSchema;
+
+    beforeEach(function() {
+        cushion = new CouchCushion();
+
+        cushion.model('Test', {
             id: { field: 'Id', prefix: 'tst' },
             type: { field: 'constant', value: 'test' },
             text: String,
             anotherString: 'string',
             num: Number,
+        });
+
+        schemaName = 'TestObj';
+        schema = {
+            id: { field: 'Id', prefix: 'tst' },
+            type: { field: 'constant', value: 'testObj' },
+            text: 'string',
+            num: 'number',
         };
-        cushion.model(schemaName, testSchema);
-    }
 
+        modelSchemaName = 'Obj';
+        modelSchema = {
+            id: { field: 'Id', prefix: 'obj' },
+            type: { field: 'constant', value: 'obj' },
+            model: 'model'
+        };
 
-    var field;
-    var schemaName = 'TestObj';
-    var schema = {
-        id: { field: 'Id', prefix: 'tst' },
-        type: { field: 'constant', value: 'testObj' },
-        text: 'string',
-        num: 'number',
-    };
-
-    var modelSchemaName = 'Obj';
-    var modelSchema = {
-        id: { field: 'Id', prefix: 'obj' },
-        type: { field: 'constant', value: 'obj' },
-        model: 'model'
-    };
-
-    cushion.model(schemaName, schema);
-    cushion.model(modelSchemaName, modelSchema);
-
+        cushion.model(schemaName, schema);
+        cushion.model(modelSchemaName, modelSchema);
+    });
 
 
     it('should construct', function(done) {
-        field = new ModelField();
+        field = new ModelField({}, undefined, cushion);
 
         field.should.have.property('get');
         field.should.have.property('set');
@@ -58,7 +60,7 @@ describe('ModelField', function() {
     });
 
     it('should support more complex models', function(done) {
-        field = new ModelField();
+        field = new ModelField({}, undefined, cushion);
         var SimpleModel = cushion.model('Test');
         var ComplexModel = cushion.model('TestObj');
 
@@ -79,7 +81,7 @@ describe('ModelField', function() {
             db = {};
             db.save = sinon.stub().callsArg(2);
 
-            field = new ModelField();
+            field = new ModelField({}, undefined, cushion);
         })
 
         // it ('should throw without an adapter', function() {
@@ -112,32 +114,31 @@ describe('ModelField', function() {
 
     describe('#getValue', function() {
         beforeEach(function() {
-            field = new ModelField();
+            field = new ModelField({}, undefined, cushion);
         });
 
         describe('when uninitialized', function() {
-            it('should return null when uninitialized', function(done) {
+            it('should return null when uninitialized', function() {
                 (field.getValue() === undefined).should.be.true;
-                done();
             });
         });
 
         describe('when initialized', function() {
-            var Model = cushion.model(schemaName);
-            var model = new Model();
+            var Model, model;
 
             beforeEach(function() {
+                Model = cushion.model(schemaName);
+                model = new Model();
                 field.set(model);
             });
 
-            it('should return an id by default', function(done) {
-                done();
-                field.getValue().should.equal(model.id);
+            it('should return an id by default', function() {
+                console.log('field: ', field);
+                should(field.getValue()).equal(model.id);
             });
 
-            it('should be able to return full model', function(done) {
-                field.getValue(true).should.match(model.getValue(true));
-                done();
+            it('should be able to return full model', function() {
+                should(field.getValue(true)).match(model.getValue(true));
             });
 
         });
@@ -146,13 +147,13 @@ describe('ModelField', function() {
 
     describe('#save', function() {
         beforeEach(function() {
-            field = new ModelField();
+            field = new ModelField({}, undefined, cushion);
         });
     });
 
     describe('#getModelType', function() {
         beforeEach(function() {
-            field = new ModelField();
+            field = new ModelField({}, undefined, cushion);
         });
 
         it('should return a falsy value by default', function(done) {
@@ -164,7 +165,7 @@ describe('ModelField', function() {
 
     describe('#setModelType', function() {
         beforeEach(function() {
-            field = new ModelField();
+            field = new ModelField({}, undefined, cushion);
         });
 
         it('should be able to be set from a model', function(done) {
@@ -212,7 +213,7 @@ describe('ModelField', function() {
 
     describe('#get', function() {
         beforeEach(function() {
-            field = new ModelField();
+            field = new ModelField({}, undefined, cushion);
         });
 
         it('should return itself', function(done) {
@@ -223,10 +224,12 @@ describe('ModelField', function() {
     });
 
     describe('#set', function() {
-        var Model = cushion.model(schemaName);
-        var model = new Model();
+        var Model, model;
+
         beforeEach(function() {
-            field = new ModelField();
+            Model = cushion.model(schemaName);
+            model = new Model();
+            field = new ModelField({}, undefined, cushion);
         });
 
         it('should throw when trying to set an invalid value', function(done) {
@@ -293,8 +296,12 @@ describe('ModelField', function() {
             });
 
             describe('and when setting from an id', function() {
-                var id = 'tst::1234-12341234-1234-12341';
-                var Model = cushion.model('Test');
+                var id, Model;
+
+                beforeEach(function() {
+                    id = 'tst::1234-12341234-1234-12341';
+                    Model = cushion.model('Test');
+                });
 
                 it('should just set an id', function(done) {
 
@@ -394,8 +401,12 @@ describe('ModelField', function() {
             });
 
             describe('and when setting from an id', function() {
-                var id = 'tst::1234-12341234-1234-12341';
-                var Model = cushion.model('Test');
+                var Model, id;
+
+                beforeEach(function() {
+                    Model = cushion.model('Test');
+                    id = 'tst::1234-12341234-1234-12341';
+                });
 
 
                 it('should only set id', function(done) {
