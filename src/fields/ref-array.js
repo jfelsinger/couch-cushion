@@ -65,7 +65,9 @@ FieldRefArray.prototype.set = function set(value) {
 /**
  * get the model that is set for the array, if there is one
  */
-FieldRefArray.prototype.getModelType = function() {
+FieldRefArray.prototype.getModel =
+FieldRefArray.prototype.getModelType =
+function() {
     return cushion.getModel(this._model);
 };
 
@@ -78,9 +80,10 @@ FieldRefArray.prototype.setModelType = function(value) {
 
     var RequestModel = cushion.getModel(value);
 
-    if (!RequestModel) throw new Error('model type not found');
+    // The model does not necesarilly have to exist right when we set it
+    // if (!RequestModel) throw new Error('model type not found');
 
-    this._model = RequestModel;
+    this._model = RequestModel || value;
     return this;
 };
 
@@ -111,12 +114,12 @@ function loadSlice() {
 
         // If all we've been given is a string, and their is a model set, we
         // can assume the string is an id, and load the model based on it
-        else if (typeof(val) === 'string' && self._model) {
+        else if (typeof(val) === 'string' && self.getModel()) {
             requests.push(function(cb) {
                 cushion.get(val, function(err, model, res) {
                     if (!err) self._value[index] = model;
                     cb(err, model, res);
-                }, self._model, self.options.bucket);
+                }, self.getModel(), self.options.bucket);
             });
         }
     });

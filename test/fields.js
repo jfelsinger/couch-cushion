@@ -39,6 +39,39 @@ describe('Fields', function() {
             field = Fields.buildScheme(scheme, 'test');
             should(field.options.default).be.an.Array;
             should(field._).be.an.Array;
+
+            scheme = { field: 'ref-array' };
+            field = Fields.buildScheme(scheme, 'test');
+            should(field._).be.an.Array;
+
+            scheme = [String];
+            field = Fields.buildScheme(scheme, 'test');
+            should(field._).be.an.Array;
+            should(field._referenceScheme).equal(String);
+
+            scheme = [{
+                field: 'Model',
+            }];
+            field = Fields.buildScheme(scheme, 'test');
+            should(field._).be.an.Array;
+            should(field._referenceScheme).be.an.Object;
+
+            scheme = [{
+                field: 'Model',
+                model: 'ShouldNotExist',
+            }];
+            field = Fields.buildScheme(scheme, 'test');
+            should(field._).be.an.Array;
+            should(field._referenceScheme).be.an.Object;
+            should(field._model).equal('ShouldNotExist');
+
+            scheme = [{
+                field: 'Model',
+                model: 'Test', // Should be an existing model
+            }];
+            field = Fields.buildScheme(scheme, 'test');
+            should(field._).be.an.Array;
+            should(field._referenceScheme).be.an.Object;
         });
     });
 
