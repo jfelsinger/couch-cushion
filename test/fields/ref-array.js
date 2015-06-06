@@ -111,6 +111,124 @@ describe('FieldRefArray', function() {
         });
     });
 
+    describe('#load', function() {
+        it('should call load on values when available', function(done) {
+            var data = [
+                { load: sinon.stub().callsArg(0) },
+                { load: sinon.stub().callsArg(0) },
+                { load: sinon.stub().callsArg(0) },
+            ];
+            field = new RefField({}, data, cushion);
+            field.load(function(err) {
+                should(err).be.not.Ok;
+
+                data.should.matchEach(function (row) {
+                    should(row.load.calledOnce).be.true;
+                });
+                done();
+            });
+        });
+
+        it('should not call load when not available', function(done) {
+            var data = [ 'asd', 'asdf', 'asdfasdf' ];
+            var Model = cushion.model(schemaName);
+            cushion.get = function(id, cb) {
+                return cb(null, new Model());
+            };
+
+            field = new RefField({
+                referenceScheme: 'Model',
+                modelType: schemaName
+            }, data, cushion);
+            field.load(function(err) {
+                should(err).be.not.Ok;
+                done();
+            });
+        });
+
+        it('should load models from ids', function(done) {
+            var data = [ 'asd', 'asdf', 'asdfasdf' ];
+            field = new RefField({}, data, cushion);
+            field.load(function(err) {
+                should(err).be.not.Ok;
+                done();
+            });
+        });
+    });
+
+    describe('#loadSlice', function() {
+        it('should call load on sliced values', function(done) {
+            var data = [
+                { load: sinon.stub().callsArg(0) },
+                { load: sinon.stub().callsArg(0) },
+                { load: sinon.stub().callsArg(0) },
+            ];
+            field = new RefField({}, data, cushion);
+            field.loadSlice(0,1,function(err) {
+                should(err).be.not.Ok;
+
+                should(data[0].load.calledOnce).be.true;
+                should(data[1].load.called).be.false;
+                should(data[2].load.called).be.false;
+
+                done();
+            });
+        });
+
+        it('should call load on single values', function(done) {
+            var data = [
+                { load: sinon.stub().callsArg(0) },
+                { load: sinon.stub().callsArg(0) },
+                { load: sinon.stub().callsArg(0) },
+            ];
+            field = new RefField({}, data, cushion);
+            field.loadSlice(1,function(err) {
+                should(err).be.not.Ok;
+
+                should(data[0].load.called).be.false;
+                should(data[1].load.calledOnce).be.true;
+                should(data[2].load.calledOnce).be.true;
+
+                done();
+            });
+        });
+    });
+
+    describe('#save', function() {
+        it('should call save function on available entries', function(done) {
+            var Model = cushion.model(schemaName);
+            var models = [
+                new Model(),
+                new Model(),
+                new Model(),
+            ];
+
+            models.forEach(function(val) {
+                val.save = sinon.stub().callsArg(0);
+            });
+
+            field = new RefField({ referenceScheme: 'Model' }, models, cushion);
+            field.save(function(err) {
+                should(err).be.not.Ok;
+
+                should(models[0].save.calledOnce).be.true;
+                should(models[1].save.calledOnce).be.true;
+                should(models[2].save.calledOnce).be.true;
+
+                done();
+            });
+        });
+    });
+
+    describe('#getArray', function() {
+        it('should the actual array value', function() {
+            var arr = [1,2,3];
+            field = new RefField({}, arr, cushion);
+            field.getArray().should.match(arr);
+            field.getArray().should.match(field._value);
+        });
+    });
+
     describe('#getModelType', function() {
         beforeEach(function() {
             field = new RefField({}, undefined, cushion);
@@ -123,42 +241,58 @@ describe('FieldRefArray', function() {
 
     });
 
+    describe('#set', function() {
+        beforeEach(function() {
+            field = new RefField({}, undefined, cushion);
+        });
+
+        it('should set the field value', function() {
+            var arr = [1,2,3];
+            field.set(arr);
+            field._value.should.match(arr);
+        });
+
+        it('should throw on non-array values', function() {
+            field.set.bind(field, null).should.throw();
+            field.set.bind(field, true).should.throw();
+            field.set.bind(field, 'str').should.throw();
+            field.set.bind(field, 1234).should.throw();
+            field.set.bind(field, {}).should.throw();
+        });
+    });
+
     describe('#setModelType', function() {
         beforeEach(function() {
             field = new RefField({}, undefined, cushion);
         });
 
-        it('should be able to be set from a model', function(done) {
+        it('should be able to be set from a model', function() {
             var model = cushion.model(schemaName);
             field.setModelType(model);
             field.getModelType().should.match(model);
-
-            done();
         });
 
-        it('should be able to be set from a model name', function(done) {
+        it('should be able to be set from a model name', function() {
             var name = schemaName;
             var model = cushion.model(name);
             field.setModelType(name);
             field.getModelType().should.match(model);
-
-            done();
         });
 
-        it('should only be able to be ran once', function(done) {
+        it('should only be able to be ran once', function() {
             var model = cushion.model(schemaName);
             field.setModelType(model);
             field.setModelType.bind(field, model).should.throw();
-
-            done();
         });
 
-        it('should throw if a model is already set', function(done) {
+        it('should throw if a model is already set', function() {
             var model = cushion.model(schemaName);
             field._model = model;
             field.setModelType.bind(field, model).should.throw();
+        });
 
-            done();
+        it('should throw if given model not available', function() {
+            field.setModelType.bind(field, 'asdflkjasdfljasdf').should.throw();
         });
 
     });

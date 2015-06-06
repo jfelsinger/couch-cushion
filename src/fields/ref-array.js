@@ -92,6 +92,7 @@ function load(cb) {
 
 FieldRefArray.prototype.loadSlice =
 function loadSlice() {
+    var self = this;
     var cb = arguments[arguments.length - 1];
     var slice;
 
@@ -104,11 +105,20 @@ function loadSlice() {
 
     var requests = [];
 
-    slice.forEach(function(val) {
+    slice.forEach(function(val, index) {
         if (val && val.load && typeof(val.load === 'function'))
             requests.push(val.load.bind(val));
 
-        else if (typeof(val) === 'string');
+        // If all we've been given is a string, and their is a model set, we
+        // can assume the string is an id, and load the model based on it
+        else if (typeof(val) === 'string' && self._model) {
+            requests.push(function(cb) {
+                cushion.get(val, function(err, model, res) {
+                    if (!err) self._value[index] = model;
+                    cb(err, model, res);
+                }, self._model, self.options.bucket);
+            });
+        }
     });
 
     //
@@ -165,10 +175,8 @@ FieldRefArray.prototype.getValue = function getValue() {
 };
 
 
-/**
- * Proxy a number of Array.prototype functions to our own value
- */
-var funcs = [
+// Proxy a number of Array.prototype functions to our field
+[
     'push', 'pop', 'shift', 'unshift',
     'concat', 'every', 'filter', 'forEach',
     'indexOf', 'join', 'lastIndexOf', 'map',
