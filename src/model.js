@@ -238,7 +238,7 @@ Model.prototype.save = function(cb, db) {
     var saves = [];
     for (var key in this._fields)
         if (this._fields[key].save && typeof(this._fields[key].save) === 'function')
-            saves.push(this._fields[key].save.bind(this));
+            saves.push(this._fields[key].save.bind(this._fields[key]));
 
     require('async').each(saves, function(save, cb) {
         save(cb, db);
