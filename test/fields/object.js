@@ -13,7 +13,16 @@ describe('ObjectField', function() {
     var field;
     var test;
     var arr = ['a','b','c'],
-        obj = {'a':1, 'b':2};
+        obj = {'a':1, 'b':2},
+        nestedArr = ['a','b',1,2,3,{
+            a:1, b:3,
+        },{
+            c:[], d:{ g:[1,2,3] },
+        }],
+        nestedObj = {
+            a: [1,2,3],
+            b: { c: ['a','b'], },
+        };
 
     it('should construct', function(done) {
         field = new ObjectField();
@@ -119,13 +128,23 @@ describe('ObjectField', function() {
 
             field.set(obj);
             value = field.getValue();
-            value.should.match(obj);
             value.should.be.an.Object;
+            value.should.match(obj);
 
             field.set(arr);
             value = field.getValue();
-            value.should.match(arr);
             value.should.be.an.Array;
+            value.should.match(arr);
+
+            field.set(nestedArr);
+            value = field.getValue();
+            value.should.be.an.Array;
+            value.should.match(nestedArr);
+
+            field.set(nestedObj);
+            value = field.getValue();
+            value.should.be.an.Object;
+            value.should.match(nestedObj);
 
             done();
         });
