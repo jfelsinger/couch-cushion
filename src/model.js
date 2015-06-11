@@ -43,6 +43,14 @@ function Model(options) {
             this._name = this._fields.id.get();
         }
     }
+
+    // Set a value if one was supplied,
+    //
+    // To make things cleaner we might want to refactor how options/values are
+    // supplied through the constructor.
+    if (options && options.value) {
+        this.set(options.value);
+    }
 }
 
 module.exports = Model;
