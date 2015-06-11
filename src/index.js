@@ -106,6 +106,8 @@ function buildModel(name, schema, override) {
 
         var model;
 
+        // TODO: Make sure that the model name is a valid Function name
+
         // We're using eval here to make it easier to debug.
         /* jslint evil:true */
         eval('model = function ' + name + '() { Model.apply(this, arguments); }');
