@@ -88,8 +88,8 @@ function walkValue(object, isArray, getAll) {
             results[key] = (value.getValue(getAll));
 
         // No get value function, so it's just a regular ol' object
-        else if (typeof(value) === 'object')
-            results[key] = walkValue(value);
+        else if (value && typeof(value) === 'object')
+            results[key] = walkValue(value, Array.isArray(value));
 
         else
             results[key] = (value);
